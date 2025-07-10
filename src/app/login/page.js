@@ -12,6 +12,65 @@ import {
   updateProfile
 } from 'firebase/auth';
 
+
+//Sign-In Logic
+
+import{
+  doc, getDoc , setDoc
+} from 'firebase/firestore';
+
+import { db } from '../firebase/config';
+
+// User Schema
+const defaultUserData = (user , nameFallback="") => ({
+  uid : user.uid,
+    name: user.displayName || nameFallback,
+  email: user.email,
+  dob: "",
+  country: "",
+  role: "",
+  workplace: "",
+  bio: "Hey there, I'm using AlumniConnect!",
+  profileImageUrl: user.photoURL || "",
+  facebook: "",
+  twitter: "",
+  linkedin: "",
+  whatsapp: "",
+})
+
+const  saveUserIfNew = async (user,name="" )=> {
+  const ref = doc(db , 'users' , user.uid);
+  const snap = await getDoc(ref);
+   if (!snap.exists()) {
+    const data = defaultUserData(user, name);
+    await setDoc(ref, data);
+    console.log('✅ User profile created in Firestore');
+  } 
+}
+
+const handleGoogleLogin = async () => {
+ try{
+   const result = await signInWithPopup(auth, new GoogleAuthProvider());
+   const user = result.user;
+   await saveUserIfNew(user, user.displayName || '');
+    alert('Google login successful!');
+  }
+  catch(e) {
+   
+    alert('Google login failed. Please try again.');
+  }
+}
+const handleGitHubSignIn = async () => {
+  try {
+    const result = await signInWithPopup(auth, new GithubAuthProvider());
+    const user = result.user;
+    await saveUserIfNew(user);
+    alert('GitHub login successful!');
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
 export default function LoginPage()
 {
    const [activeTab , setActiveTab] = useState('login');
@@ -29,6 +88,9 @@ export default function LoginPage()
         }
         else{
             const userCredential = await createUserWithEmailAndPassword(auth , email , password);
+           const user = userCredential.user;
+           await updateProfile(user, { displayName: name})
+           await saveUserIfNew(user, name);
             alert('Registration successful');
         }
 
@@ -157,7 +219,7 @@ export default function LoginPage()
         className='flex flex-col sm:flex-row gap-3 mt-3'>
           <button
           onClick={() => {
-            alert('Google login not implemented yet');
+           handleGoogleSignIn();
             
           }}
           className = 'w-full h-10 bg-[#f3f0f4] rounded-xl font-bold text-sm'
@@ -166,7 +228,7 @@ export default function LoginPage()
        </button>
 
         <button
-              onClick={() => alert('GitHub login coming soon')}
+              onClick={() =>  handleGitHubSignIn()}
               className="w-full h-10 bg-[#f3f0f4] rounded-xl font-bold text-sm"
             >
               Continue with GitHub

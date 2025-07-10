@@ -3,7 +3,7 @@
 //Firebase configuration for the AlumniConnect app
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-
+import { getFirestore } from "firebase/firestore";
 // ✅ Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDPs4mhViWhhrYL5hbaQ2AM4z1gr87xwkQ",
@@ -19,3 +19,4 @@ const app = initializeApp(firebaseConfig);
 
 // ✅ Export Firebase Auth
 export const auth = getAuth(app);
+export const db = getFirestore(app);
