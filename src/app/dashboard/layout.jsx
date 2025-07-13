@@ -74,14 +74,7 @@ useEffect(() => {
       {/* Top Navigation */}
       <Navbar setSidebarOpen={setSidebarOpen} />
 
-      {/* Mobile Nav Icons */}
-      <nav className="md:hidden flex justify-around py-2 border-b border-[#f1f1f4] bg-white text-sm">
-        <button><Home className="w-5 h-5" /></button>
-        <button><MessageSquare className="w-5 h-5" /></button>
-        <button><Users className="w-5 h-5" /></button>
-        <button><Brain className="w-5 h-5" /></button>
-        <button><Bell className="w-5 h-5" /></button>
-      </nav>
+      
 
       <div className="flex flex-1">
         {/* Sidebar */}
