@@ -2,7 +2,7 @@
 
 import React , { useState } from 'react';
 import { auth } from '../firebase/config';
-
+import { useRouter } from 'next/navigation';
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
@@ -48,55 +48,67 @@ const  saveUserIfNew = async (user,name="" )=> {
   } 
 }
 
-const handleGoogleLogin = async () => {
- try{
-   const result = await signInWithPopup(auth, new GoogleAuthProvider());
-   const user = result.user;
-   await saveUserIfNew(user, user.displayName || '');
-    alert('Google login successful!');
-  }
-  catch(e) {
-   
-    alert('Google login failed. Please try again.');
-  }
-}
-const handleGitHubSignIn = async () => {
-  try {
-    const result = await signInWithPopup(auth, new GithubAuthProvider());
-    const user = result.user;
-    await saveUserIfNew(user);
-    alert('GitHub login successful!');
-  } catch (err) {
-    alert(err.message);
-  }
-};
+
 
 export default function LoginPage()
 {
+
+  const router = useRouter();
+   const [loading , setLoading] = useState(false);
    const [activeTab , setActiveTab] = useState('login');
    const [email , setemail] = useState('');
    const [password , setPassword] = useState('');
    const [name, setName] = useState('');
 
 
+
+  //google sign in function and github sign in function
+  const handleGoogleLogin = async () => {
+  try {
+    setLoading(true);
+    const result = await signInWithPopup(auth, new GoogleAuthProvider());
+    const user = result.user;
+    await saveUserIfNew(user, user.displayName || '');
+   
+    router.replace('/dashboard'); // ✅ redirect
+  } catch (e) {
+    alert('Google login failed. Please try again.');
+    setLoading(false);
+  }
+};
+
+const handleGitHubSignIn = async () => {
+  try {
+    setLoading(true);
+    const result = await signInWithPopup(auth, new GithubAuthProvider());
+    const user = result.user;
+    await saveUserIfNew(user)
+    router.replace('/dashboard');
+  } catch (err) {
+    alert(err.message);
+    setLoading(false);
+  }
+};
    //this function will login or register the user based on the active tab
    const handleEmailAuth = async () => {
     try{
+       setLoading(true);
         if(activeTab === 'login') {
            await signInWithEmailAndPassword(auth , email , password);
-           alert('Login successful');
+          router.replace('/dashboard');
         }
         else{
             const userCredential = await createUserWithEmailAndPassword(auth , email , password);
            const user = userCredential.user;
            await updateProfile(user, { displayName: name})
            await saveUserIfNew(user, name);
-            alert('Registration successful');
+          router.replace('/dashboard');
         }
 
     }
     catch(e){
        alert(e.message);
+       setLoading(false);
     }
    }
 
@@ -121,6 +133,12 @@ export default function LoginPage()
           <h2 className="text-lg font-bold">AlumniConnect</h2>
         </div>
      </header>
+ {loading && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-purple-500 border-solid"></div>
+  </div>
+)}
+
 
      <main className='flex flex-1 justify-center items-center px-4 py-8'>
 
@@ -219,7 +237,7 @@ export default function LoginPage()
         className='flex flex-col sm:flex-row gap-3 mt-3'>
           <button
           onClick={() => {
-           handleGoogleSignIn();
+           handleGoogleLogin();
             
           }}
           className = 'w-full h-10 bg-[#f3f0f4] rounded-xl font-bold text-sm'
