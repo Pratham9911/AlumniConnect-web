@@ -17,16 +17,16 @@ const Navbar = ({ setSidebarOpen = null }) => {
         <div className="flex items-center gap-2 md:gap-3 min-w-[140px]">
           <div className="w-5 h-5 md:w-6 md:h-6">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="currentColor" />
+              <path d="M6 6H42L36 24L42 42H6L12 24L6 6Z" fill="black" />
             </svg>
           </div>
-          <h2 className="text-lg font-bold md:text-xl truncate whitespace-nowrap">AlumniConnect</h2>
+          <h2 className="text-lg text-black font-bold md:text-xl truncate whitespace-nowrap">AlumniConnect</h2>
         </div>
       </div>
 
       {/* Center: Navigation */}
       <nav className="hidden md:flex gap-6 text-sm font-medium text-[#121217]">
-        <a href="#" className="hover:text-[#7f6189]">Home</a>
+        <a href="/dashboard" className="hover:text-[#7f6189]">Home</a>
         <a href="#" className="hover:text-[#7f6189]">Chats</a>
         <a href="#" className="hover:text-[#7f6189]">Community</a>
         <a href="#" className="hover:text-[#7f6189]">AI</a>

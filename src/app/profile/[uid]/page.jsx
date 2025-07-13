@@ -8,6 +8,7 @@ import { db } from '@/app/firebase/config';
 
 import UserHeader from '@/app/components/profile/UserHeader';
 import SectionList from '@/app/components/profile/SectionList';
+import Navbar from '@/app/components/Navbar';
 
 export default function ProfilePage() {
   const { uid } = useParams();
@@ -55,21 +56,30 @@ export default function ProfilePage() {
     if (uid) fetchData();
   }, [uid]);
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+      
+    </div>
+  );
+}
+
   if (!userData) return <div className="p-6 text-red-500">User not found.</div>;
 
   return (
     <main className="min-h-screen bg-[#f8f9fb]">
+      <Navbar/>
       {/* Fullscreen Profile Header */}
-      <UserHeader user={userData} isOwner={isOwner} />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-      {/* Profile Sections */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <SectionList
-          uid={uid}
-          isOwner={isOwner}
-          sections={sections}
-        />
+      <UserHeader user={userData} isOwner={isOwner} />
+      
+      <SectionList
+        uid={uid}
+        isOwner={isOwner}
+        sections={sections}
+      />
       </div>
     </main>
   );

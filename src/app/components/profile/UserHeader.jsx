@@ -49,16 +49,11 @@ export default function UserHeader({ user, isOwner }) {
 
   return (
     <div className="w-full bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 relative">
-      {/* Back Button */}
-      <button
-        onClick={() => router.push('/dashboard')}
-        className="absolute top-4 left-4 z-30 bg-white shadow px-4 py-1 rounded-md text-sm font-medium hover:bg-gray-100"
-      >
-        ← Back
-      </button>
+      
+      
 
       {/* Background */}
-      <div className="relative h-48 bg-gradient-to-br from-pink-200 to-white">
+      <div className="relative h-48 bg-gradient-to-br from-pink-200 to-white group">
         {user.backgroundImageUrl && (
           <Image
             src={user.backgroundImageUrl}
@@ -72,7 +67,7 @@ export default function UserHeader({ user, isOwner }) {
           <>
             <button
               onClick={() => bgInputRef.current.click()}
-              className="absolute top-3 right-3 bg-black/60 hover:bg-black/70 text-white p-2 rounded-full z-10"
+              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70 text-white p-2 rounded-full z-10"
               title="Edit background"
             >
               <FaPen size={14} />
@@ -90,7 +85,8 @@ export default function UserHeader({ user, isOwner }) {
 
       {/* Profile image (floating) */}
       <div className="relative px-6">
-        <div className="absolute -top-14 sm:-top-16 left-6 sm:left-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white overflow-hidden z-20">
+        <div className="absolute -top-14 sm:-top-16 left-6 sm:left-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white overflow-hidden z-20 group ">
+
           {user.profileImageUrl && (
             <Image
               src={user.profileImageUrl}
@@ -103,8 +99,8 @@ export default function UserHeader({ user, isOwner }) {
             <>
               <button
                 onClick={() => fileInputRef.current.click()}
-                className="absolute bottom-1 right-1 bg-black/70 hover:bg-black/80 text-white p-2 rounded-full"
-                title="Edit profile picture"
+                className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                 title="Edit profile picture"
               >
                 <FaPen size={12} />
               </button>

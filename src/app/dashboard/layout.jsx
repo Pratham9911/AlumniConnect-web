@@ -91,7 +91,7 @@ useEffect(() => {
   } md:flex flex-col px-6 py-6 items-center gap-6`}
 >
   <button
-    className="absolute top-4 right-4 md:hidden"
+    className="absolute top-4 left-4 md:hidden"
     onClick={() => setSidebarOpen(false)}
   >
     <X className="w-6 h-6" />
@@ -125,13 +125,14 @@ useEffect(() => {
       key={label}
       className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[#f3f0f4] font-medium w-full text-left"
       onClick={() => {
-        if (label === 'Logout') {
-          setShowLogoutConfirm(true);
-        } else {
-          // later we can route to settings/profile etc.
-          console.log(`${label} clicked`);
-        }
-      }}
+  if (label === 'Logout') {
+    setShowLogoutConfirm(true);
+  } else if (label === 'Profile') {
+    router.push(`/profile/${userData?.uid}`);
+  } else {
+    console.log(`${label} clicked`);
+  }
+}}
     >
       <Icon className="w-5 h-5" /> {label}
     </button>
