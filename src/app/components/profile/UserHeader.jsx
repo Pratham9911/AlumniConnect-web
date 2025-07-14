@@ -8,49 +8,52 @@ import { uploadImageToCloudinary } from '@/lib/cloudinary';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
 import { getCloudinarySignature } from '@/lib/cloudinary';
+import EditProfileModal from '@/app/components/profile/EditProfileModal'; 
+
 
 export default function UserHeader({ user, isOwner }) {
   const router = useRouter();
   const fileInputRef = useRef(null);
   const bgInputRef = useRef(null);
   const [updating, setUpdating] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
- const handleImageUpload = async (type, file) => {
-  try {
-    setUpdating(true);
+  const handleImageUpload = async (type, file) => {
+    try {
+      setUpdating(true);
 
-    const folder = type === 'profile' ? 'user_profiles' : 'user_backgrounds';
-    const publicId = `${type}_${user.uid}`;
+      const folder = type === 'profile' ? 'user_profiles' : 'user_backgrounds';
+      const publicId = `${type}_${user.uid}`;
 
-    // ✅ Get signed upload parameters from backend
-    const signaturePayload = await getCloudinarySignature(publicId, folder);
+      // ✅ Get signed upload parameters from backend
+      const signaturePayload = await getCloudinarySignature(publicId, folder);
 
-    // ✅ Upload to Cloudinary using signed params
-    const imageUrl = await uploadImageToCloudinary(
-      file,
-      folder,
-      publicId,
-      signaturePayload
-    );
+      // ✅ Upload to Cloudinary using signed params
+      const imageUrl = await uploadImageToCloudinary(
+        file,
+        folder,
+        publicId,
+        signaturePayload
+      );
 
-    // ✅ Update Firestore with the new image URL
-    await updateDoc(doc(db, 'users', user.uid), {
-      [`${type}ImageUrl`]: imageUrl,
-    });
+      // ✅ Update Firestore with the new image URL
+      await updateDoc(doc(db, 'users', user.uid), {
+        [`${type}ImageUrl`]: imageUrl,
+      });
 
-    window.location.reload();
-  } catch (err) {
-    console.error('Image update failed', err);
-  } finally {
-    setUpdating(false);
-  }
-};
+      window.location.reload();
+    } catch (err) {
+      console.error('Image update failed', err);
+    } finally {
+      setUpdating(false);
+    }
+  };
 
 
   return (
     <div className="w-full bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 relative">
-      
-      
+
+
 
       {/* Background */}
       <div className="relative h-48 bg-gradient-to-br from-pink-200 to-white group">
@@ -67,7 +70,7 @@ export default function UserHeader({ user, isOwner }) {
           <>
             <button
               onClick={() => bgInputRef.current.click()}
-            className="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70  text-white p-2 rounded-full z-10"              title="Edit background"
+              className="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70  text-white p-2 rounded-full z-10" title="Edit background"
             >
               <FaPen size={14} />
             </button>
@@ -97,12 +100,13 @@ export default function UserHeader({ user, isOwner }) {
           {isOwner && (
             <>
               <button
-                onClick={() => fileInputRef.current.click()}
+                onClick={() => setShowEdit(true)}
                 className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                 title="Edit profile picture"
+                title="Edit profile picture"
               >
                 <FaPen size={12} />
               </button>
+
               <input
                 type="file"
                 accept="image/*"
@@ -202,6 +206,8 @@ export default function UserHeader({ user, isOwner }) {
           </div>
         )}
       </div>
+      {showEdit && <EditProfileModal user={user} onClose={() => setShowEdit(false)} />}
+
     </div>
   );
 }

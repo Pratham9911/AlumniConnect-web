@@ -70,7 +70,7 @@ useEffect(() => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white text-[#121217] font-sans flex flex-col">
+    <div className=" min-h-screen bg-white text-[#121217] font-sans flex flex-col">
       {/* Top Navigation */}
       <Navbar setSidebarOpen={setSidebarOpen} />
 

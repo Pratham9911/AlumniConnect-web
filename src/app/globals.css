@@ -40,4 +40,8 @@ body {
   .animate-scaleIn {
     animation: scaleIn 0.2s ease-out forwards;
   }
+  .input {
+  @apply border px-3 py-2 rounded-md text-sm w-full;
+}
+
 }
