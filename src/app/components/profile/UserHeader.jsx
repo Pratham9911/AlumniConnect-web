@@ -67,8 +67,7 @@ export default function UserHeader({ user, isOwner }) {
           <>
             <button
               onClick={() => bgInputRef.current.click()}
-              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70 text-white p-2 rounded-full z-10"
-              title="Edit background"
+            className="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70  text-white p-2 rounded-full z-10"              title="Edit background"
             >
               <FaPen size={14} />
             </button>

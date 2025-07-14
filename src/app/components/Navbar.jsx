@@ -53,6 +53,7 @@ const Navbar = ({ setSidebarOpen = null }) => {
             <Search className="w-5 h-5 text-[#121217]" />
           </button>
         </div>
+         <button><Bell className="w-5 h-5 text-[#121217]" /></button>
       </header>
 
       {/* Bottom Mobile Nav */}
@@ -67,7 +68,7 @@ const Navbar = ({ setSidebarOpen = null }) => {
     <button><MessageSquare className="w-5 h-5 text-[#121217]" /></button>
     <button><Users className="w-5 h-5 text-[#121217]" /></button>
     <button><Brain className="w-5 h-5 text-[#121217]" /></button>
-    <button><Bell className="w-5 h-5 text-[#121217]" /></button>
+
   </div>
 </nav>
 
