@@ -5,8 +5,8 @@
 import { useEffect, useState } from 'react';
 import { collection, doc, getDocs, onSnapshot, query } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
-import SectionCard from './SectionCard.jsx';
-import AddSectionDialog from './dialogs/AddSectionDialog.jsx';
+import SectionCard from '@/app/components/profile/SectionCard';
+import AddSectionDialog from '@/app/components/profile/Dialogs/AddSectionDialog';
 import { Plus } from 'lucide-react';
 
 export default function SectionList({ uid, isOwner }) {

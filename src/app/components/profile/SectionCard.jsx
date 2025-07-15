@@ -6,9 +6,9 @@ import { useState, useRef } from 'react';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
 import { Pencil, Trash2, Plus } from 'lucide-react';
-import AddEntryDialog from './dialogs/AddEntryDialog';
-import EditSectionDialog from './dialogs/EditSectionDialog';
-import EntryCard from './EntryCard';
+import AddEntryDialog from '@/app/components/profile/Dialogs/AddEntryDialog';
+import EditSectionDialog from '@/app/components/profile/Dialogs/EditSectionDialog';
+import EntryCard from '@/app/components/profile/EntryCard';
 
 export default function SectionCard({ uid, section, isOwner, refetchSections }) {
   const [showAddEntry, setShowAddEntry] = useState(false);

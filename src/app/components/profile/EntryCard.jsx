@@ -5,7 +5,7 @@
 import { Trash2, Pencil } from 'lucide-react';
 import { doc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
-import EditEntryDialog from './dialogs/EditEntryDialog';
+import EditEntryDialog from '@/app/components/profile/Dialogs/EditEntryDialog';
 import { useState } from 'react';
 
 export default function EntryCard({ uid, sectionId, entry, isOwner, refetchSections }) {
