@@ -197,14 +197,7 @@ export default function UserHeader({ user, isOwner }) {
           </div>
         </div>
 
-        {/* Add Section */}
-        {isOwner && (
-          <div className="mt-8">
-            <button className="border border-blue-500 text-blue-500 px-4 py-2 rounded-md text-sm hover:bg-blue-50 transition-all">
-              Add Section
-            </button>
-          </div>
-        )}
+       
       </div>
       {showEdit && <EditProfileModal user={user} onClose={() => setShowEdit(false)} />}
 
