@@ -1,30 +1,66 @@
 @import "tailwindcss";
 
+/* Default Light Theme */
 :root {
+  
   --background: #ffffff;
   --foreground: #171717;
+  --button-border: #000000;
+  --button-text: #ffffffff;
+  --navbar-bg: #ffffff;
+  --navbar-text: #121217;
+  --primary: #2563eb;
+  --search-bg: #f1f1f4;
+  --search-text: #121217;
+  --sidebar-border: #f1f1f4;
+  --sidebar-border1: #f1f1f4;
+  --search-placeholder: #676783;
+
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Dark Mode Class */
+.dark-mode {
+  --none : black;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --button-border: #ff7300;
+  --button-text: #ff7300;
+  --navbar-bg: #000000;
+  --primary: #ff7300;
+  --navbar-text: #ff7300;
+  --search-bg: #000000;
+  --sidebar-border: #ffffff;
+  --sidebar-border1: #000000;
+  --search-text: #ff7300;
+  --search-placeholder: #ff7300;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Global Base */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Reusable Layout Classes */
+.screen {
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, sans-serif);
+}
+
+.btn {
+  padding: 0.5rem 1.25rem;
+  border: 2px solid var(--button-border);
+  color: var(--button-text);
+  background: transparent;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Animations + Tailwind Addons */
 @layer utilities {
   @keyframes scaleIn {
     0% {
@@ -40,8 +76,8 @@ body {
   .animate-scaleIn {
     animation: scaleIn 0.2s ease-out forwards;
   }
-  .input {
-  @apply border px-3 py-2 rounded-md text-sm w-full;
-}
 
+  .input {
+    @apply border px-3 py-2 rounded-md text-sm w-full;
+  }
 }

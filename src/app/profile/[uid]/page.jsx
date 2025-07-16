@@ -68,18 +68,12 @@ export default function ProfilePage() {
   if (!userData) return <div className="p-6 text-red-500">User not found.</div>;
 
   return (
-    <main className="min-h-screen bg-[#f8f9fb]">
-      <Navbar/>
-      {/* Fullscreen Profile Header */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+   <main className="min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+      <Navbar />
+   <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-8 space-y-8">
 
-      <UserHeader user={userData} isOwner={isOwner} />
-      
-      <SectionList
-        uid={uid}
-        isOwner={isOwner}
-        sections={sections}
-      />
+        <UserHeader user={userData} isOwner={isOwner} />
+        <SectionList uid={uid} isOwner={isOwner} sections={sections} />
       </div>
     </main>
   );

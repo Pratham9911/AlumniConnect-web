@@ -31,7 +31,7 @@ export default function EditSectionDialog({ uid, sectionId, currentTitle, onClos
   };
 
   return (
-    <div className="fixed inset-0 text-black bg-black/40 z-50 flex items-center justify-center px-4">
+    <div className="fixed inset-0 text-black bg-black/10 z-50 flex items-center justify-center px-4">
       <div className="bg-white w-full max-w-md rounded-lg p-6 shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Edit Section Title</h2>
 

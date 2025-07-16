@@ -8,8 +8,8 @@ import { uploadImageToCloudinary } from '@/lib/cloudinary';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
 import { getCloudinarySignature } from '@/lib/cloudinary';
-import EditProfileModal from '@/app/components/profile/EditProfileModal'; 
-
+import EditProfileModal from '@/app/components/profile/EditProfileModal';
+import { useTheme } from '@/app/context/ThemeContext';
 
 export default function UserHeader({ user, isOwner }) {
   const router = useRouter();
@@ -17,30 +17,18 @@ export default function UserHeader({ user, isOwner }) {
   const bgInputRef = useRef(null);
   const [updating, setUpdating] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const { theme } = useTheme();
 
   const handleImageUpload = async (type, file) => {
     try {
       setUpdating(true);
-
       const folder = type === 'profile' ? 'user_profiles' : 'user_backgrounds';
       const publicId = `${type}_${user.uid}`;
-
-      // ✅ Get signed upload parameters from backend
       const signaturePayload = await getCloudinarySignature(publicId, folder);
-
-      // ✅ Upload to Cloudinary using signed params
-      const imageUrl = await uploadImageToCloudinary(
-        file,
-        folder,
-        publicId,
-        signaturePayload
-      );
-
-      // ✅ Update Firestore with the new image URL
+      const imageUrl = await uploadImageToCloudinary(file, folder, publicId, signaturePayload);
       await updateDoc(doc(db, 'users', user.uid), {
         [`${type}ImageUrl`]: imageUrl,
       });
-
       window.location.reload();
     } catch (err) {
       console.error('Image update failed', err);
@@ -49,30 +37,28 @@ export default function UserHeader({ user, isOwner }) {
     }
   };
 
-
   return (
-    <div className="w-full bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 relative">
-
-
-
+    <div
+      className="w-full shadow-sm rounded-lg overflow-hidden border relative"
+      style={{
+        backgroundColor: 'var(--background)',
+        color: 'var(--foreground)',
+        borderColor: 'var(--search-bg)',
+      }}
+    >
       {/* Background */}
-      <div className="relative h-48 bg-gradient-to-br from-pink-200 to-white group">
+      <div className="relative h-48 group">
         {user.backgroundImageUrl && (
-          <Image
-            src={user.backgroundImageUrl}
-            fill
-            alt="Background"
-            className="object-cover"
-          />
+          <Image src={user.backgroundImageUrl} fill alt="Background" className="object-cover" />
         )}
-
         {isOwner && (
           <>
             <button
               onClick={() => bgInputRef.current.click()}
-              className="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70  text-white p-2 rounded-full z-10" title="Edit background"
+              className="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70 text-white p-2 rounded-full z-10"
+              title="Edit background"
             >
-              <FaPen size={14} />
+              <FaPen size={14} style={{ color: theme === 'dark' ? '#ff7300' : undefined }} />
             </button>
             <input
               type="file"
@@ -85,17 +71,11 @@ export default function UserHeader({ user, isOwner }) {
         )}
       </div>
 
-      {/* Profile image (floating) */}
+      {/* Profile Image */}
       <div className="relative px-6">
-        <div className="absolute -top-14 sm:-top-16 left-6 sm:left-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white overflow-hidden z-20 group ">
-
+        <div className="absolute -top-14 sm:-top-16 left-6 sm:left-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white overflow-hidden z-20 group">
           {user.profileImageUrl && (
-            <Image
-              src={user.profileImageUrl}
-              alt="Profile"
-              fill
-              className="object-cover"
-            />
+            <Image src={user.profileImageUrl} alt="Profile" fill className="object-cover" />
           )}
           {isOwner && (
             <>
@@ -104,9 +84,8 @@ export default function UserHeader({ user, isOwner }) {
                 className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                 title="Edit profile picture"
               >
-                <FaPen size={12} />
+                <FaPen size={12} style={{ color: theme === 'dark' ? '#ff7300' : undefined }} />
               </button>
-
               <input
                 type="file"
                 accept="image/*"
@@ -119,88 +98,80 @@ export default function UserHeader({ user, isOwner }) {
         </div>
       </div>
 
-      {/* Info section (below background) */}
+      {/* Info */}
       <div className="mt-20 sm:mt-24 px-6 sm:px-10 pb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between">
           <div className="max-w-3xl">
-            <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
-            <p className="text-gray-700 text-sm mt-1">{user.role}</p>
-            <p className="text-gray-600 text-sm">{user.workplace}</p>
-            <p className="text-gray-500 text-sm">{user.country}</p>
-            <p className="text-gray-600 text-sm mt-1">
+            <h2 className="text-2xl font-bold" >{user.name}</h2>
+            <p className="text-sm mt-1">{user.role}</p>
+            <p className="text-sm" >{user.workplace}</p>
+            <p className="text-sm" >{user.country}</p>
+            <p className="text-sm mt-1">
               <span className="font-semibold">1,234</span> followers · <span className="font-semibold">500+</span> connections
             </p>
           </div>
           <div className="mt-4 sm:mt-0">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md text-sm font-medium shadow">
+            <button
+              className="px-5 py-2 rounded-md text-sm font-bold shadow transition"
+              style={{
+                backgroundColor: theme === 'dark' ? '#ff7300' : '#3b82f6',
+                color: theme==='dark' ? '#000000' : '#ffffff',
+              }}
+            >
               Connect
             </button>
           </div>
         </div>
 
-        {/* About Section */}
+        {/* About */}
         <div className="mt-8">
-          <h3 className="text-md font-semibold text-gray-900">About</h3>
-          <p className="text-sm text-gray-700 mt-2 leading-relaxed">
+          <h3 className="text-md font-semibold" >About</h3>
+          <p className="text-sm mt-2 leading-relaxed" >
             {user.bio || 'No bio added yet.'}
           </p>
         </div>
 
         {/* Connect Icons */}
         <div className="mt-6">
-          <h3 className="text-md font-semibold text-gray-900 mb-3">Connect</h3>
+          <h3 className="text-md font-semibold mb-3" style={{ color: 'var(--foreground)' }}>Connect</h3>
           <div className="flex flex-wrap gap-3">
-            {user.whatsapp && (
-              <a
-                href={`https://wa.me/${user.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium"
-              >
-                <FaWhatsapp />
-                WhatsApp
-              </a>
-            )}
-            {user.linkedin && (
-              <a
-                href={user.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium"
-              >
-                <FaLinkedinIn />
-                LinkedIn
-              </a>
-            )}
-            {user.facebook && (
-              <a
-                href={user.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium"
-              >
-                <FaFacebookF />
-                Facebook
-              </a>
-            )}
-            {user.twitter && (
-              <a
-                href={user.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium"
-              >
-                <FaTwitter />
-                Twitter
-              </a>
-            )}
+            {[{ icon: FaWhatsapp, label: 'WhatsApp', href: user.whatsapp ? `https://wa.me/${user.whatsapp}` : null },
+            { icon: FaLinkedinIn, label: 'LinkedIn', href: user.linkedin },
+            { icon: FaFacebookF, label: 'Facebook', href: user.facebook },
+            { icon: FaTwitter, label: 'Twitter', href: user.twitter }]
+              .filter(item => item.href)
+              .map(({ icon: Icon, label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 border-2 rounded-md text-sm font-medium transition"
+
+                  style={{
+                      backgroundColor: theme === 'dark' ? '' : '#eff6ff',  
+                    borderColor: theme === 'dark' ? '#ff7300' : '#eff6ff',
+                    color: theme === 'dark' ? '#ff7300' : '#1d4ed8',
+                  }}
+
+                  onMouseEnter={(e) => {
+                    if (theme === 'dark') e.currentTarget.style.color = '#ffa94d';
+                    else e.currentTarget.style.backgroundColor = '#dbeafe';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (theme === 'dark') e.currentTarget.style.color = '#ff7300';
+                    else e.currentTarget.style.backgroundColor = '#eff6ff';
+                  }}
+                >
+                  <Icon />
+                  {label}
+                </a>
+              ))}
           </div>
         </div>
-
-       
       </div>
-      {showEdit && <EditProfileModal user={user} onClose={() => setShowEdit(false)} />}
 
+      {showEdit && <EditProfileModal user={user} onClose={() => setShowEdit(false)} />}
     </div>
   );
 }
