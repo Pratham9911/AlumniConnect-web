@@ -57,7 +57,7 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen font-sans flex flex-col" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
       {/* Top Navigation */}
-      <Navbar setSidebarOpen={setSidebarOpen} />
+      <Navbar setSidebarOpen={setSidebarOpen}  user={userData} />
 
       <div className="flex flex-1">
         {/* Sidebar */}
@@ -89,7 +89,7 @@ export default function DashboardLayout({ children }) {
           </div>
 
           {/* Navigation */}
-          <nav className="w-full flex flex-col gap-3">
+          <nav className="w-full mt-7 md:mt-2 flex flex-col gap-3">
             {[
               { label: 'Profile', icon: User },
               { label: 'Settings', icon: Settings },

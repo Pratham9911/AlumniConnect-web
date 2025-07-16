@@ -1,5 +1,3 @@
-// components/profile/SectionCard.jsx
-
 'use client';
 
 import { useState, useRef } from 'react';
@@ -9,12 +7,14 @@ import { Pencil, Trash2, Plus } from 'lucide-react';
 import AddEntryDialog from '@/app/components/profile/Dialogs/AddEntryDialog';
 import EditSectionDialog from '@/app/components/profile/Dialogs/EditSectionDialog';
 import EntryCard from '@/app/components/profile/EntryCard';
+import { useTheme } from '@/app/context/ThemeContext';
 
 export default function SectionCard({ uid, section, isOwner, refetchSections }) {
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [showEditSection, setShowEditSection] = useState(false);
   const [showMobileActions, setShowMobileActions] = useState(false);
   const longPressTimer = useRef(null);
+  const { theme } = useTheme();
 
   const handleDeleteSection = async () => {
     if (!confirm('Delete this section?')) return;
@@ -32,12 +32,29 @@ export default function SectionCard({ uid, section, isOwner, refetchSections }) 
 
   return (
     <div
-      className="relative group border border-gray-200 bg-white rounded-lg p-4 shadow hover:shadow-md transition"
+      className="relative group rounded-lg p-4 shadow hover:shadow-md transition"
+      style={{
+        backgroundColor: theme === 'dark' ? 'var(--background)' : '#ffffff',
+        border: `1px solid ${theme === 'dark' ? 'var(--sidebar-border)' : '#e5e7eb'}`,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = theme === 'dark' ? '#ff7300' : '#e5e7eb';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = theme === 'dark' ? 'var(--sidebar-border)' : '#e5e7eb';
+      }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-semibold text-gray-900">{section.title}</h3>
+        <h3
+          className="text-xl font-semibold"
+          style={{
+            color: theme === 'dark' ? 'var(--foreground)' : '#111827', // text-gray-900
+          }}
+        >
+          {section.title}
+        </h3>
 
         {isOwner && (
           <div className="hidden md:flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -80,7 +97,12 @@ export default function SectionCard({ uid, section, isOwner, refetchSections }) 
             />
           ))
         ) : (
-          <li className="text-gray-500 italic">No entries added yet.</li>
+          <li
+            className="italic"
+            style={{ color: theme === 'dark' ? 'var(--foreground)' : '#6B7280' }} // gray-500
+          >
+            No entries added yet.
+          </li>
         )}
       </ul>
 
@@ -109,7 +131,12 @@ export default function SectionCard({ uid, section, isOwner, refetchSections }) 
 
       {isOwner && showMobileActions && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4 md:hidden">
-          <div className="bg-white w-full max-w-xs rounded-lg p-4 space-y-3">
+          <div
+            className="w-full max-w-xs rounded-lg p-4 space-y-3"
+            style={{
+              backgroundColor: theme === 'dark' ? 'var(--background)' : '#ffffff',
+            }}
+          >
             <button
               onClick={() => {
                 setShowEditSection(true);
