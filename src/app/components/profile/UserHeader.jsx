@@ -10,6 +10,7 @@ import { db } from '@/app/firebase/config';
 import { getCloudinarySignature } from '@/lib/cloudinary';
 import EditProfileModal from '@/app/components/profile/EditProfileModal';
 import { useTheme } from '@/app/context/ThemeContext';
+import imageCompression from 'browser-image-compression'; 
 
 export default function UserHeader({ user, isOwner }) {
   const router = useRouter();
@@ -18,24 +19,36 @@ export default function UserHeader({ user, isOwner }) {
   const [updating, setUpdating] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const { theme } = useTheme();
+ 
 
-  const handleImageUpload = async (type, file) => {
-    try {
-      setUpdating(true);
-      const folder = type === 'profile' ? 'user_profiles' : 'user_backgrounds';
-      const publicId = `${type}_${user.uid}`;
-      const signaturePayload = await getCloudinarySignature(publicId, folder);
-      const imageUrl = await uploadImageToCloudinary(file, folder, publicId, signaturePayload);
-      await updateDoc(doc(db, 'users', user.uid), {
-        [`${type}ImageUrl`]: imageUrl,
-      });
-      window.location.reload();
-    } catch (err) {
-      console.error('Image update failed', err);
-    } finally {
-      setUpdating(false);
-    }
-  };
+const handleImageUpload = async (type, file) => {
+  try {
+    setUpdating(true);
+
+    // ✅ Compress the image
+    const compressedFile = await imageCompression(file, {
+      maxSizeMB: 0.1,              // Try to keep under 200 KB
+      maxWidthOrHeight: 600,       // Resize large images (600px max)
+      useWebWorker: true,
+    });
+
+    const folder = type === 'profile' ? 'user_profiles' : 'user_backgrounds';
+    const publicId = `${type}_${user.uid}`;
+    const signaturePayload = await getCloudinarySignature(publicId, folder);
+    const imageUrl = await uploadImageToCloudinary(compressedFile, folder, publicId, signaturePayload);
+
+    await updateDoc(doc(db, 'users', user.uid), {
+      [`${type}ImageUrl`]: imageUrl,
+    });
+
+    window.location.reload();
+  } catch (err) {
+    console.error('Image update failed', err);
+  } finally {
+    setUpdating(false);
+  }
+};
+
 
   return (
     <div
@@ -47,56 +60,80 @@ export default function UserHeader({ user, isOwner }) {
       }}
     >
       {/* Background */}
-      <div className="relative h-48 group">
-        {user.backgroundImageUrl && (
-          <Image src={user.backgroundImageUrl} fill alt="Background" className="object-cover" />
-        )}
-        {isOwner && (
-          <>
-            <button
-              onClick={() => bgInputRef.current.click()}
-              className="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70 text-white p-2 rounded-full z-10"
-              title="Edit background"
-            >
-              <FaPen size={14} style={{ color: theme === 'dark' ? '#ff7300' : undefined }} />
-            </button>
-            <input
-              type="file"
-              accept="image/*"
-              ref={bgInputRef}
-              onChange={(e) => handleImageUpload('background', e.target.files[0])}
-              className="hidden"
-            />
-          </>
-        )}
-      </div>
+<div className="relative h-48 group">
+  {user.backgroundImageUrl ? (
+    <Image
+      src={user.backgroundImageUrl}
+      fill
+      alt="Background"
+      className="object-cover"
+    />
+  ) : (
+    <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] to-[#1e293b] flex items-center justify-center">
+      <h2 className="text-2xl sm:text-3xl font-semibold text-white opacity-80">
+        {user.name || 'User'}
+      </h2>
+    </div>
+  )}
+
+  {isOwner && (
+    <>
+      <button
+        onClick={() => bgInputRef.current.click()}
+        className="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 bg-black/60 hover:bg-black/70 text-white p-2 rounded-full z-10"
+        title="Edit background"
+      >
+        <FaPen size={14} style={{ color: theme === 'dark' ? '#ff7300' : undefined }} />
+      </button>
+      <input
+        type="file"
+        accept="image/*"
+        ref={bgInputRef}
+        onChange={(e) => handleImageUpload('background', e.target.files[0])}
+        className="hidden"
+      />
+    </>
+  )}
+</div>
+
 
       {/* Profile Image */}
-      <div className="relative px-6">
-        <div className="absolute -top-14 sm:-top-16 left-6 sm:left-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white overflow-hidden z-20 group">
-          {user.profileImageUrl && (
-            <Image src={user.profileImageUrl} alt="Profile" fill className="object-cover" />
-          )}
-          {isOwner && (
-            <>
-              <button
-                onClick={() => setShowEdit(true)}
-                className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                title="Edit profile picture"
-              >
-                <FaPen size={12} style={{ color: theme === 'dark' ? '#ff7300' : undefined }} />
-              </button>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={(e) => handleImageUpload('profile', e.target.files[0])}
-                className="hidden"
-              />
-            </>
-          )}
-        </div>
-      </div>
+<div className="relative px-6">
+  <div className="absolute -top-14 sm:-top-16 left-6 sm:left-10 w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-white overflow-hidden z-20 group">
+    {user.profileImageUrl || user.photoURL ? (
+      <Image
+        src={user.profileImageUrl || user.photoURL}
+        alt="Profile"
+        fill
+        className="object-cover"
+      />
+    ) : <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a] to-[#1e293b] flex items-center justify-center">
+      <h2 className="text-2xl sm:text-3xl font-semibold text-white opacity-80">
+        {user.name[0] || ' '}
+      </h2>
+    </div>}
+
+    {isOwner && (
+      <>
+        <button
+          onClick={() => setShowEdit(true)}
+          className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+          title="Edit profile picture"
+        >
+          <FaPen size={12} style={{ color: theme === 'dark' ? '#ff7300' : undefined }} />
+        </button>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={(e) => handleImageUpload('profile', e.target.files[0])}
+          className="hidden"
+        />
+      </>
+    )}
+  </div>
+</div>
+
 
       {/* Info */}
       <div className="mt-20 sm:mt-24 px-6 sm:px-10 pb-6">

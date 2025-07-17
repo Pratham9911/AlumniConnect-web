@@ -3,13 +3,17 @@
 import React from 'react';
 import Link from 'next/link';
 import { Search, Home, MessageSquare, Users, Brain, Bell } from 'lucide-react';
-import { useTheme } from '@/app/context/ThemeContext'; // assumes you use this context
-import { useAuth } from '@/app/firebase/config'; // for user profile image
+import { useTheme } from '@/app/context/ThemeContext';
+import { useAuth } from '@/app/firebase/config';
+import { useRouter } from 'next/navigation';
 
 const Navbar = ({ setSidebarOpen = null, user = null }) => {
   const { theme } = useTheme();
   const { currentUser } = useAuth();
-
+  const router = useRouter();
+  const handleSearchFocus = () => {
+    router.push('/search');
+  };
   return (
     <>
       {/* Top Navbar */}
@@ -31,8 +35,8 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
                   alt="User"
                   className="w-8 h-8 rounded-full border"
                   style={{
-                    borderColor:theme==='dark'? 'var(--navbar-text)':"",
-                    borderWidth:theme==='dark'?'2px': '0px',
+                    borderColor: theme === 'dark' ? 'var(--navbar-text)' : "",
+                    borderWidth: theme === 'dark' ? '2px' : '0px',
                     borderStyle: 'solid',
                   }}
                 />
@@ -41,7 +45,7 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
                   className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold"
                   style={{ color: 'var(--navbar-text)' }}
                 >
-                  U
+                  
                 </div>
               )}
             </button>
@@ -63,6 +67,8 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
             { label: 'Chats', href: '/chats' },
             { label: 'Community', href: '/community' },
             { label: 'AI', href: '/ai' },
+
+
           ].map(({ label, href }) => (
             <Link key={label} href={href}>
               <span
@@ -77,6 +83,7 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
           ))}
         </nav>
 
+
         {/* Right: Search, Bell */}
         <div className="flex items-center gap-3 flex-1 justify-end">
           <div className="relative w-full max-w-md hidden md:block">
@@ -84,20 +91,29 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
               <Search className="w-5 h-5" style={{ color: 'var(--search-placeholder)' }} />
             </div>
             <input
+              id="navbar-search-input"
               type="text"
               placeholder="Search alumni..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl text-sm"
+              onFocus={handleSearchFocus}
+           
+              className="w-full pl-10 pr-4 py-2 rounded-xl text-sm cursor-pointer"
               style={{
                 backgroundColor: 'var(--search-bg)',
                 color: 'var(--search-text)',
               }}
             />
+
           </div>
 
           {/* Mobile Search Icon */}
-          <button className="rounded-full p-2 md:hidden" style={{ backgroundColor: 'var(--search-bg)' }}>
+          <button
+            className="rounded-full p-2 md:hidden"
+            style={{ backgroundColor: 'var(--search-bg)' }}
+            onClick={() => router.push('/search')}
+          >
             <Search className="w-5 h-5" style={{ color: 'var(--search-text)' }} />
           </button>
+
         </div>
 
         {/* Bell Icon */}
@@ -123,6 +139,7 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
             { label: 'Messages', href: '/chats', icon: MessageSquare },
             { label: 'Community', href: '/community', icon: Users },
             { label: 'AI', href: '/ai', icon: Brain },
+
           ].map(({ href, icon: Icon }) => (
             <Link key={href} href={href}>
               <div
@@ -135,6 +152,7 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
             </Link>
           ))}
         </div>
+
       </nav>
     </>
   );

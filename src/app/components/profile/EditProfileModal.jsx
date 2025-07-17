@@ -6,6 +6,7 @@ import { db } from '@/app/firebase/config';
 import { getCloudinarySignature, uploadImageToCloudinary } from '@/lib/cloudinary';
 import { FaTimes } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
+import imageCompression from 'browser-image-compression';
 
 export default function EditProfileModal({ user, onClose }) {
   const [form, setForm] = useState({
@@ -25,15 +26,33 @@ export default function EditProfileModal({ user, onClose }) {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleUpload = async (file) => {
-    setLoading(true);
+ 
+
+const handleUpload = async (file) => {
+  setLoading(true);
+
+  try {
+    // Compress image before upload
+    const compressedFile = await imageCompression(file, {
+      maxSizeMB: 0.2,             // Max size ~200 KB
+      maxWidthOrHeight: 600,      // Resize dimensions (e.g. 600px max)
+      useWebWorker: true,
+    });
+
     const folder = 'user_profiles';
     const publicId = `profile_${user.uid}`;
     const signature = await getCloudinarySignature(publicId, folder);
-    const url = await uploadImageToCloudinary(file, folder, publicId, signature);
+    const url = await uploadImageToCloudinary(compressedFile, folder, publicId, signature);
+
     setForm(prev => ({ ...prev, profileImageUrl: url }));
+  } catch (error) {
+    console.error('Image compression or upload failed:', error);
+    toast.error('Image upload failed');
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   const handleSave = async () => {
     const toastId = 'profile-toast';
