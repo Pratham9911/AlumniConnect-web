@@ -92,6 +92,7 @@ export default function DashboardLayout({ children }) {
           <nav className="w-full mt-7 md:mt-2 flex flex-col gap-3">
             {[
               { label: 'Profile', icon: User },
+              { label: 'Network', icon: Users },
               { label: 'Settings', icon: Settings },
               { label: 'About', icon: Info },
               { label: 'Logout', icon: LogOut }
@@ -108,6 +109,9 @@ export default function DashboardLayout({ children }) {
                   } 
                   else if (label === 'Settings') {
                     router.push('/settings');
+                  }
+                  else if (label === 'Network') {
+                    router.push('/network');
                   }
                   else if (label === 'Profile') {
                     router.push(`/profile/${userData?.uid}`);

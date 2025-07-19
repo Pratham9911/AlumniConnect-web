@@ -39,35 +39,36 @@ export default function SearchUsers() {
       }}
     >
       {/* ✅ Sticky Header without border */}
-      <div
-        className="sticky top-0 z-50 px-4 py-3 flex items-center gap-2 sm:gap-3"
-        style={{
-          backgroundColor: 'var(--background)',
-        }}
-      >
-        {/* Back button */}
-        <button
-          onClick={() => router.back()}
-          className="p-2 rounded-full hover:bg-[var(--search-bg)] transition flex-shrink-0"
-          aria-label="Back"
-        >
-          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--primary)]" />
-        </button>
+<div
+  className="sticky top-0 z-50 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2"
+  style={{
+    backgroundColor: 'var(--background)',
+  }}
+>
+  {/* Back button (hidden on mobile) */}
+  <button
+    onClick={() => router.back()}
+    className="hidden sm:flex p-2 rounded-full hover:bg-[var(--search-bg)] transition flex-shrink-0"
+    aria-label="Back"
+  >
+    <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--primary)]" />
+  </button>
 
-        {/* Search input */}
-        <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-3 flex items-center">
-            <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--search-placeholder)]" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-[var(--sidebar-border)] bg-[var(--search-bg)] text-[var(--search-text)] placeholder-[var(--search-placeholder)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm sm:text-base"
-          />
-        </div>
-      </div>
+  {/* Search input */}
+  <div className="relative w-full">
+    <div className="absolute inset-y-0 left-3 flex items-center">
+      <Search className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--search-placeholder)]" />
+    </div>
+    <input
+      type="text"
+      placeholder="Search by name or email..."
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      className="w-full pl-9 pr-4 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-[var(--sidebar-border)] bg-[var(--search-bg)] text-[var(--search-text)] placeholder-[var(--search-placeholder)] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm sm:text-base"
+    />
+  </div>
+</div>
+
 
       {/* 🔽 Scrollable results */}
       <div className="space-y-3 px-4 py-4">
