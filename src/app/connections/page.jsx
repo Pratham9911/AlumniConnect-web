@@ -13,10 +13,32 @@ export default function ConnectionsPage() {
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  //to check if B has Deleted A from Friends
+const cleanupDisconnectedFriends = async () => {
+  const myUid = currentUser.uid;
+
+  const mySnap = await getDoc(doc(db, 'users', myUid));
+  const myConnections = mySnap.data()?.connections || [];
+
+  for (const friendUid of myConnections) {
+    const friendSnap = await getDoc(doc(db, 'users', friendUid));
+    const friendConnections = friendSnap.data()?.connections || [];
+
+    // If my UID is missing from their connections → remove them from mine
+    if (!friendConnections.includes(myUid)) {
+      await updateDoc(doc(db, 'users', myUid), {
+        connections: arrayRemove(friendUid),
+      });
+      console.log(`Removed stale connection: ${friendUid}`);
+    }
+  }
+};
+
   useEffect(() => {
     const fetchConnections = async () => {
       if (!currentUser) return;
 
+      cleanupDisconnectedFriends();
       const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
       const uids = userDoc.data()?.connections || [];
 

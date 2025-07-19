@@ -31,49 +31,53 @@ export default function PendingRequests() {
 
         const result = [];
 
-        for (const receiverUid of pendingConnections) {
-          const receiverRef = doc(db, 'users', receiverUid);
-          const receiverSnap = await getDoc(receiverRef);
+    for (const receiverUid of pendingConnections) {
+  const receiverRef = doc(db, 'users', receiverUid);
+  const receiverSnap = await getDoc(receiverRef);
 
-          if (!receiverSnap.exists()) continue;
+  if (!receiverSnap.exists()) continue;
 
-          const receiverData = receiverSnap.data();
-          const receiverConnections = receiverData.connections || [];
+  const receiverData = receiverSnap.data();
+  const receiverConnections = receiverData.connections || [];
 
-          if (receiverConnections.includes(currentUser.uid)) {
-            // ✅ They've accepted → mutual connection
-            const myConnections = userSnap.data()?.connections || [];
+  if (receiverConnections.includes(currentUser.uid)) {
+    // ✅ They've accepted → mutual connection
 
-            if (!myConnections.includes(receiverUid)) {
-              await updateDoc(userRef, {
-                connections: [...myConnections, receiverUid],
-              });
-            }
+    const latestUserSnap = await getDoc(userRef);  // ✅ fresh snapshot
+    const myConnections = latestUserSnap.data()?.connections || [];
 
-            // ✅ Remove request from their side
-            await deleteDoc(
-              doc(
-                db,
-                'connectionRequests',
-                receiverUid,
-                'requests',
-                `from_${currentUser.uid}`
-              )
-            );
+    if (!myConnections.includes(receiverUid)) {
+      await updateDoc(userRef, {
+        connections: [...myConnections, receiverUid],
+      });
+    }
 
-            // ✅ Remove from my pendingConnections
-            await updateDoc(userRef, {
-              pendingConnections: arrayRemove(receiverUid),
-            });
+    // ✅ Remove request from their side
+    await deleteDoc(
+      doc(
+        db,
+        'connectionRequests',
+        receiverUid,
+        'requests',
+        `from_${currentUser.uid}`
+      )
+    );
 
-            continue; // don't show this in pending list
-          }
+    // ✅ Remove from my pendingConnections
+    await updateDoc(userRef, {
+      pendingConnections: arrayRemove(receiverUid),
+    });
 
-          result.push({
-            uid: receiverUid,
-            ...receiverData,
-          });
-        }
+    continue; // Don’t show this user in pending list
+  }
+
+  result.push({
+    uid: receiverUid,
+    ...receiverData,
+  });
+}
+
+
 
         setPendingList(result);
       } catch (err) {

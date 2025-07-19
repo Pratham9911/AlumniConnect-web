@@ -44,44 +44,34 @@ export default function IncomingRequests() {
     fetchRequests();
   }, [currentUser]);
 
-  const handleAccept = async (senderUid) => {
-    const receiverUid = currentUser.uid;
-    const receiverRef = doc(db, 'users', receiverUid);
-    const receiverSnap = await getDoc(receiverRef);
-    const receiverConnections = receiverSnap.data()?.connections || [];
+const handleAccept = async (senderUid) => {
+  const receiverUid = currentUser.uid;
 
-    // ✅ Only update current user's own document
-    if (!receiverConnections.includes(senderUid)) {
-      await updateDoc(receiverRef, {
-        connections: [...receiverConnections, senderUid],
-      });
-    }
+  const receiverRef = doc(db, 'users', receiverUid);
+  const receiverSnap = await getDoc(receiverRef);
+  const receiverConnections = receiverSnap.data()?.connections || [];
 
-    // ✅ Delete request (B → incoming)
-   const reqRef = doc(
-  db,
-  'connectionRequests',
-  receiverUid,
-  'requests',
-  `from_${senderUid}`
-);
+  if (!receiverConnections.includes(senderUid)) {
+    await updateDoc(receiverRef, {
+      connections: [...receiverConnections, senderUid],
+    });
+  }
 
-    await deleteDoc(reqRef);
+  // ✅ B can delete their own incoming request
+  const reqRef = doc(
+    db,
+    'connectionRequests',
+    receiverUid,
+    'requests',
+    `from_${senderUid}`
+  );
+  await deleteDoc(reqRef);
 
-    setRequests((prev) => prev.filter((u) => u.uid !== senderUid));
-  };
+  // ✅ Let A detect the acceptance and update themselves
+  setRequests((prev) => prev.filter((u) => u.uid !== senderUid));
+};
 
-  const handleDecline = async (senderUid) => {
-    const reqRef = doc(
-  db,
-  'connectionRequests',
-  currentUser.uid,
-  'requests',
-  `from_${senderUid}`
-);
-    await deleteDoc(reqRef);
-    setRequests((prev) => prev.filter((r) => r.uid !== senderUid));
-  };
+
 
   if (loading) {
     return (
