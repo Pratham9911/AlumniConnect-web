@@ -70,6 +70,26 @@ const handleAccept = async (senderUid) => {
   // ✅ Let A detect the acceptance and update themselves
   setRequests((prev) => prev.filter((u) => u.uid !== senderUid));
 };
+const handleDecline = async (senderUid) => {
+  const receiverUid = currentUser.uid;
+
+  try {
+    // Only B deletes the request they received from A
+    const reqRef = doc(
+      db,
+      'connectionRequests',
+      receiverUid,
+      'requests',
+      `from_${senderUid}`
+    );
+    await deleteDoc(reqRef);
+
+    // Remove it from UI
+    setRequests((prev) => prev.filter((u) => u.uid !== senderUid));
+  } catch (err) {
+    console.error('Failed to decline request:', err);
+  }
+};
 
 
 
