@@ -8,6 +8,7 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
+  arrayRemove,
 } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
 import { useAuth } from '@/app/firebase/config';
@@ -48,16 +49,31 @@ const handleAccept = async (senderUid) => {
   const receiverUid = currentUser.uid;
 
   const receiverRef = doc(db, 'users', receiverUid);
-  const receiverSnap = await getDoc(receiverRef);
-  const receiverConnections = receiverSnap.data()?.connections || [];
+  const senderRef = doc(db, 'users', senderUid);
 
+  const [receiverSnap, senderSnap] = await Promise.all([
+    getDoc(receiverRef),
+    getDoc(senderRef),
+  ]);
+
+  const receiverConnections = receiverSnap.data()?.connections || [];
+  const senderConnections = senderSnap.data()?.connections || [];
+
+  // Add A → B if not already
   if (!receiverConnections.includes(senderUid)) {
     await updateDoc(receiverRef, {
       connections: [...receiverConnections, senderUid],
     });
   }
 
-  // ✅ B can delete their own incoming request
+  // Add B → A if not already
+  if (!senderConnections.includes(receiverUid)) {
+    await updateDoc(senderRef, {
+      connections: [...senderConnections, receiverUid],
+    });
+  }
+
+  // Delete request (from A → B)
   const reqRef = doc(
     db,
     'connectionRequests',
@@ -67,9 +83,14 @@ const handleAccept = async (senderUid) => {
   );
   await deleteDoc(reqRef);
 
-  // ✅ Let A detect the acceptance and update themselves
+  // Optionally remove B from A's pendingConnections
+  await updateDoc(senderRef, {
+    pendingConnections: arrayRemove(receiverUid),
+  });
+
   setRequests((prev) => prev.filter((u) => u.uid !== senderUid));
 };
+
 const handleDecline = async (senderUid) => {
   const receiverUid = currentUser.uid;
 

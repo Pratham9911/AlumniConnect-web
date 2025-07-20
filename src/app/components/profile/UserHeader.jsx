@@ -80,30 +80,36 @@ const checkIfBAlreadyAccepted = async () => {
   const senderUid = currentUser.uid;
   const receiverUid = user.uid;
 
+  // Only continue if request still exists
+  const reqDoc = await getDoc(
+    doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`)
+  );
+  if (!reqDoc.exists()) return;
+
   const receiverSnap = await getDoc(doc(db, 'users', receiverUid));
   const receiverConnections = receiverSnap.data()?.connections || [];
 
   if (receiverConnections.includes(senderUid)) {
-    // B accepted → A adds B
+    // B accepted → A adds B (only once)
     const senderRef = doc(db, 'users', senderUid);
     const senderSnap = await getDoc(senderRef);
     const myConnections = senderSnap.data()?.connections || [];
-    setRequestStatus('connected');
+
     if (!myConnections.includes(receiverUid)) {
       await updateDoc(senderRef, {
         connections: [...myConnections, receiverUid],
       });
     }
 
-    // Remove request
-    await deleteDoc(
-      doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`)
-    );
+    // ✅ Remove request
+    await deleteDoc(doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`));
 
-    // Remove from pendingConnections (optional)
+    // ✅ Remove from pendingConnections
     await updateDoc(senderRef, {
       pendingConnections: arrayRemove(receiverUid),
     });
+
+    setRequestStatus('connected');
   }
 };
 
@@ -123,7 +129,7 @@ useEffect(() => {
       setRequestStatus('connected');
       return;
     }
-    await checkIfBAlreadyAccepted ();
+   await checkIfBAlreadyAccepted();
 
     // 🔍 If not connected, check if request is still pending
     try {

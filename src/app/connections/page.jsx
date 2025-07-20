@@ -57,17 +57,29 @@ const cleanupDisconnectedFriends = async () => {
   }, [currentUser]);
 
   const handleDelete = async (uidToRemove) => {
-    if (!confirm('Are you sure you want to remove this connection?')) return;
+  if (!confirm('Are you sure you want to remove this connection?')) return;
 
-    try {
-      await updateDoc(doc(db, 'users', currentUser.uid), {
-        connections: arrayRemove(uidToRemove),
-      });
-      setConnections((prev) => prev.filter((c) => c.uid !== uidToRemove));
-    } catch (err) {
-      console.error('Failed to delete connection:', err);
-    }
-  };
+  try {
+    const myUid = currentUser.uid;
+
+    // 1. Remove them from my connections
+    await updateDoc(doc(db, 'users', myUid), {
+      connections: arrayRemove(uidToRemove),
+    });
+
+    // 2. Remove myself from their connections
+    await updateDoc(doc(db, 'users', uidToRemove), {
+      connections: arrayRemove(myUid),
+    });
+
+    // 3. Update UI
+    setConnections((prev) => prev.filter((c) => c.uid !== uidToRemove));
+    console.log(`Connection removed: ${myUid} ↔ ${uidToRemove}`);
+  } catch (err) {
+    console.error('Failed to delete connection:', err);
+  }
+};
+
 
   if (loading) {
     return (
