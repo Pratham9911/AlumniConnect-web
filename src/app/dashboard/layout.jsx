@@ -57,14 +57,13 @@ export default function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen font-sans flex flex-col" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
       {/* Top Navigation */}
-      <Navbar setSidebarOpen={setSidebarOpen}  user={userData} />
+      <Navbar setSidebarOpen={setSidebarOpen} user={userData} />
 
       <div className="flex flex-1">
         {/* Sidebar */}
         <aside
-          className={`fixed z-30 top-0 left-0 h-full w-64 border-r transform md:relative md:translate-x-0 transition-transform duration-200 ease-in-out ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } md:flex flex-col px-6 py-6 items-center gap-6`}
+          className={`fixed z-30 top-0 left-0 h-full w-64 border-r transform md:relative md:translate-x-0 transition-transform duration-200 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            } md:flex flex-col px-6 py-6 items-center gap-6`}
           style={{ backgroundColor: 'var(--background)', borderColor: 'var(--sidebar-border1)' }}
         >
           <button className="absolute top-4 left-4 md:hidden" onClick={() => setSidebarOpen(false)}>
@@ -82,10 +81,21 @@ export default function DashboardLayout({ children }) {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="text-center">
-              <p className="font-bold text-lg">{userData?.name || 'Loading...'}</p>
-              <p className="text-sm">{userData?.role || 'Loading...'}</p>
+            <div className="flex flex-col text-center w-full max-w-[160px] overflow-hidden">
+              <p
+                className="font-bold text-base truncate"
+                title={userData?.name}
+              >
+                {userData?.name || 'Loading...'}
+              </p>
+              <p
+                className="text-sm truncate"
+                title={userData?.role}
+              >
+                {userData?.role || 'Loading...'}
+              </p>
             </div>
+
           </div>
 
           {/* Navigation */}
@@ -106,7 +116,7 @@ export default function DashboardLayout({ children }) {
                 onClick={() => {
                   if (label === 'Logout') {
                     setShowLogoutConfirm(true);
-                  } 
+                  }
                   else if (label === 'Settings') {
                     router.push('/settings');
                   }
@@ -142,12 +152,12 @@ export default function DashboardLayout({ children }) {
             <div className="flex items-center justify-between px-4 py-2">
               <div className="flex items-center gap-2">
                 <button
-                 >
-                  <ImageIcon className="w-5 h-5"  />
+                >
+                  <ImageIcon className="w-5 h-5" />
                 </button>
                 <button
                 >
-                  <Hash className="w-5 h-5"  />
+                  <Hash className="w-5 h-5" />
                 </button>
               </div>
               <button className="px-4 py-1 rounded-full text-sm font-medium" style={{ backgroundColor: '#adadea', color: '#000000' }}>

@@ -14,25 +14,25 @@ export default function ConnectionsPage() {
   const [loading, setLoading] = useState(true);
 
   //to check if B has Deleted A from Friends
-const cleanupDisconnectedFriends = async () => {
-  const myUid = currentUser.uid;
+  const cleanupDisconnectedFriends = async () => {
+    const myUid = currentUser.uid;
 
-  const mySnap = await getDoc(doc(db, 'users', myUid));
-  const myConnections = mySnap.data()?.connections || [];
+    const mySnap = await getDoc(doc(db, 'users', myUid));
+    const myConnections = mySnap.data()?.connections || [];
 
-  for (const friendUid of myConnections) {
-    const friendSnap = await getDoc(doc(db, 'users', friendUid));
-    const friendConnections = friendSnap.data()?.connections || [];
+    for (const friendUid of myConnections) {
+      const friendSnap = await getDoc(doc(db, 'users', friendUid));
+      const friendConnections = friendSnap.data()?.connections || [];
 
-    // If my UID is missing from their connections → remove them from mine
-    if (!friendConnections.includes(myUid)) {
-      await updateDoc(doc(db, 'users', myUid), {
-        connections: arrayRemove(friendUid),
-      });
-      console.log(`Removed stale connection: ${friendUid}`);
+      // If my UID is missing from their connections → remove them from mine
+      if (!friendConnections.includes(myUid)) {
+        await updateDoc(doc(db, 'users', myUid), {
+          connections: arrayRemove(friendUid),
+        });
+        console.log(`Removed stale connection: ${friendUid}`);
+      }
     }
-  }
-};
+  };
 
   useEffect(() => {
     const fetchConnections = async () => {
@@ -57,28 +57,28 @@ const cleanupDisconnectedFriends = async () => {
   }, [currentUser]);
 
   const handleDelete = async (uidToRemove) => {
-  if (!confirm('Are you sure you want to remove this connection?')) return;
+    if (!confirm('Are you sure you want to remove this connection?')) return;
 
-  try {
-    const myUid = currentUser.uid;
+    try {
+      const myUid = currentUser.uid;
 
-    // 1. Remove them from my connections
-    await updateDoc(doc(db, 'users', myUid), {
-      connections: arrayRemove(uidToRemove),
-    });
+      // 1. Remove them from my connections
+      await updateDoc(doc(db, 'users', myUid), {
+        connections: arrayRemove(uidToRemove),
+      });
 
-    // 2. Remove myself from their connections
-    await updateDoc(doc(db, 'users', uidToRemove), {
-      connections: arrayRemove(myUid),
-    });
+      // 2. Remove myself from their connections
+      await updateDoc(doc(db, 'users', uidToRemove), {
+        connections: arrayRemove(myUid),
+      });
 
-    // 3. Update UI
-    setConnections((prev) => prev.filter((c) => c.uid !== uidToRemove));
-    console.log(`Connection removed: ${myUid} ↔ ${uidToRemove}`);
-  } catch (err) {
-    console.error('Failed to delete connection:', err);
-  }
-};
+      // 3. Update UI
+      setConnections((prev) => prev.filter((c) => c.uid !== uidToRemove));
+      console.log(`Connection removed: ${myUid} ↔ ${uidToRemove}`);
+    } catch (err) {
+      console.error('Failed to delete connection:', err);
+    }
+  };
 
 
   if (loading) {
@@ -91,61 +91,70 @@ const cleanupDisconnectedFriends = async () => {
 
   return (
     <>
-    <Navbar user={currentUser} />
-    <div className="p-4 space-y-4">
-      <h1 className="text-xl font-bold mb-4">Your Connections  {connections.length}</h1>
-      {connections.length === 0 ? (
-        <p className="text-sm text-gray-500">No connections yet.</p>
-      ) : (
-        connections.map((user) => (
-          <div
-            key={user.uid}
-            className="flex items-center justify-between p-4 border rounded-md"
-            style={{
-              backgroundColor: 'var(--background)',
-              borderColor: 'var(--sidebar-border)',
-              color: 'var(--foreground)',
-            }}
-          >
-            <Link
-              href={`/profile/${user.uid}`}
-              className="flex items-center gap-4 hover:underline flex-1"
+      <Navbar user={currentUser} />
+      <div className="p-4 space-y-4">
+        <h1 className="text-xl font-bold mb-4">Your Connections  {connections.length}</h1>
+        {connections.length === 0 ? (
+          <p className="text-sm text-gray-500">No connections yet.</p>
+        ) : (
+          connections.map((user) => (
+            <div
+              key={user.uid}
+              className="flex items-center justify-between p-4 border rounded-md"
+              style={{
+                backgroundColor: 'var(--background)',
+                borderColor: 'var(--sidebar-border)',
+                color: 'var(--foreground)',
+              }}
             >
-              {user.profileImageUrl ? (
-                <img
-                  src={user.profileImageUrl}
-                  className="w-10 h-10 rounded-full object-cover"
-                  alt={user.name}
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-sm">
-                  {user.name?.[0]?.toUpperCase() || 'U'}
-                </div>
-              )}
-              <div className="flex flex-col">
-                <span className="font-semibold">{user.name}</span>
-                <span className="text-sm text-[var(--search-placeholder)]">
-                  {user.role || 'No role set'}
-                </span>
-              </div>
-            </Link>
-
-            <div className="flex gap-2">
-              <button className="text-blue-500 hover:text-blue-700">
-                <MessageCircle className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => handleDelete(user.uid)}
-                className="text-red-500 hover:text-red-700"
+              <Link
+                href={`/profile/${user.uid}`}
+                className="flex items-center gap-4 flex-1"
               >
-                <XCircle className="w-5 h-5" />
-              </button>
+                {user.profileImageUrl ? (
+                  <img
+                    src={user.profileImageUrl}
+                    className="w-10 h-10 rounded-full object-cover"
+                    alt={user.name}
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-sm">
+                    {user.name?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                )}
+                <div className="flex flex-col max-w-[150px] sm:max-w-none">
+                  <span className="font-semibold truncate">{user.name}</span>
+                  <span className="text-sm text-[var(--search-placeholder)] truncate">
+                    {user.role || 'No role set'}
+                  </span>
+                </div>
+
+              </Link>
+
+              <div className="flex gap-2">
+                <button
+                  className="px-2 py-1 sm:px-5 sm:py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2
+             text-blue-500 hover:text-blue-700 sm:text-white sm:bg-green-400 sm:hover:bg-green-500"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span className="hidden sm:inline">Message</span>
+                </button>
+
+                <button
+                  onClick={() => handleDelete(user.uid)}
+                  className="px-2 py-1 sm:px-5 sm:py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2
+             text-red-400 hover:text-black sm:text-white sm:bg-red-400 sm:hover:bg-red-500"
+                >
+                  <XCircle className="w-5 h-5" />
+                  <span className="hidden sm:inline">Remove</span>
+                </button>
+
+              </div>
             </div>
-          </div>
-        ))
-      )}
-    </div>
+          ))
+        )}
+      </div>
     </>
-    
+
   );
 }

@@ -127,52 +127,83 @@ const handleDecline = async (senderUid) => {
   }
 
   return (
-    <div className="space-y-4">
-      {requests.map((user) => (
-        <div
-          key={user.uid}
-          className="flex items-center justify-between gap-4 p-4 border rounded-md"
-          style={{
-            backgroundColor: 'var(--background)',
-            borderColor: 'var(--sidebar-border)',
-            color: 'var(--foreground)',
-          }}
+  <div className="space-y-4">
+    {requests.map((user) => (
+      <div
+        key={user.uid}
+        className="flex items-center justify-between gap-4 p-4 border rounded-md"
+        style={{
+          backgroundColor: 'var(--background)',
+          borderColor: 'var(--sidebar-border)',
+          color: 'var(--foreground)',
+        }}
+      >
+        <Link
+          href={`/profile/${user.uid}`}
+          className="flex items-center gap-4 flex-1"
         >
-          <Link href={`/profile/${user.uid}`} className="flex items-center gap-4 flex-1 hover:underline">
-            {user.profileImageUrl ? (
-              <img
-                src={user.profileImageUrl}
-                alt={user.name}
-                className="w-10 h-10 rounded-full object-cover border"
-                style={{ borderColor: 'var(--sidebar-border1)' }}
-              />
-            ) : (
-              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-300 text-sm font-bold">
-                {user.name?.[0]?.toUpperCase() || 'U'}
-              </div>
-            )}
-            <div className="flex flex-col">
-              <span className="font-semibold">{user.name}</span>
-              <span className="text-sm text-[var(--search-placeholder)]">{user.role || 'No role set'}</span>
+          {user.profileImageUrl ? (
+            <img
+              src={user.profileImageUrl}
+              alt={user.name}
+              className="w-10 h-10 rounded-full object-cover border"
+              style={{ borderColor: 'var(--sidebar-border1)' }}
+            />
+          ) : (
+            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-300 text-sm font-bold">
+              {user.name?.[0]?.toUpperCase() || 'U'}
             </div>
-          </Link>
+          )}
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleAccept(user.uid)}
-              className="px-3 py-1 text-sm rounded-md bg-green-500 text-white hover:bg-green-600"
-            >
-              Accept
-            </button>
-            <button
-              onClick={() => handleDecline(user.uid)}
-              className="px-3 py-1 text-sm rounded-md bg-red-500 text-white hover:bg-red-600"
-            >
-              Decline
-            </button>
+          <div className="flex flex-col overflow-hidden">
+            <span className="font-semibold truncate">{user.name}</span>
+            <span className="text-sm text-[var(--search-placeholder)] truncate max-w-[120px] sm:max-w-none">
+              {user.role || 'No role set'}
+            </span>
           </div>
-        </div>
-      ))}
-    </div>
-  );
+        </Link>
+
+       <div className="flex gap-2 items-center">
+  <button
+  onClick={() => handleAccept(user.uid)}
+  className="w-9 h-9 flex items-center justify-center rounded-full border border-green-500 text-green-500 hover:text-white hover:bg-green-500 transition"
+  aria-label="Accept"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-5 h-5"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+  </svg>
+</button>
+
+
+ <button
+  onClick={() => handleDecline(user.uid)}
+  className="w-9 h-9 flex items-center justify-center rounded-full border border-red-400 text-red-500 hover:bg-red-400 transition group"
+  aria-label="Decline"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-5 h-5 stroke-current text-red-500 group-hover:text-white transition"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth="2"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+</button>
+
+
+</div>
+
+      </div>
+    ))}
+  </div>
+);
+
 }

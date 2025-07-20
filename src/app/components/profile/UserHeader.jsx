@@ -117,35 +117,44 @@ const checkIfBAlreadyAccepted = async () => {
 useEffect(() => {
   if (!currentUser || !user?.uid || currentUser.uid === user.uid) return;
 
-  const senderUid = currentUser.uid;
-  const receiverUid = user.uid;
+  const senderUid = currentUser.uid;  // A (viewer)
+  const receiverUid = user.uid;       // B (profile)
 
   const unsubscribe = onSnapshot(doc(db, 'users', senderUid), async (docSnap) => {
     const myConnections = docSnap.data()?.connections || [];
 
-    cleanupDisconnectedFriends();
+    // 🧹 Cleanup broken connections
+    await cleanupDisconnectedFriends();
+
     // ✅ Already connected
     if (myConnections.includes(receiverUid)) {
       setRequestStatus('connected');
       return;
     }
-   await checkIfBAlreadyAccepted();
 
-    // 🔍 If not connected, check if request is still pending
-    try {
-      const reqDoc = await getDoc(
-        doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`)
-      );
+    // ✅ B already accepted A's request
+    await checkIfBAlreadyAccepted();
 
-      if (reqDoc.exists()) {
-        setRequestStatus('pending');
-      } else {
-        setRequestStatus('');
-      }
-    } catch (err) {
-      console.error('Error checking request status:', err);
-      setRequestStatus('');
+    // 🔍 A → B request (you sent the request)
+    const sentReqDoc = await getDoc(
+      doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`)
+    );
+    if (sentReqDoc.exists()) {
+      setRequestStatus('pending');
+      return;
     }
+
+    // 🔍 B → A request (they sent the request to you)
+    const incomingReqDoc = await getDoc(
+      doc(db, 'connectionRequests', senderUid, 'requests', `from_${receiverUid}`)
+    );
+    if (incomingReqDoc.exists()) {
+      setRequestStatus('requested'); // ✅ they sent you a request
+      return;
+    }
+
+    // ❌ No relationship
+    setRequestStatus('');
   });
 
   return () => unsubscribe();
@@ -287,41 +296,53 @@ useEffect(() => {
 
           </div>
 
-          <div className="mt-4 sm:mt-0">
-            {isOwner ? null : requestStatus === 'connected' ? (
-              <button
-                className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2"
-                style={{
-                  backgroundColor: theme === 'dark' ? '#22c55e' : '#4ade80',
-                  color: theme === 'dark' ? '#000000' : '#ffffff',
-                }}
-              >
-                <MessageCircle size={16} /> Message
-              </button>
-            ) : requestStatus === 'pending' ? (
-              <button
-                disabled
-                className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2 opacity-70 cursor-not-allowed"
-                style={{
-                  backgroundColor: theme === 'dark' ? '#ff7300' : '#eab308',
-                  color: theme === 'dark' ? '#000000' : '#ffffff',
-                }}
-              >
-                <Clock size={16} className="animate-pulse" /> Pending
-              </button>
-            ) : (
-              <button
-                onClick={handleConnect}
-                className="px-5 py-2 rounded-md text-sm font-bold shadow transition"
-                style={{
-                  backgroundColor: theme === 'dark' ? '#ff7300' : '#3b82f6',
-                  color: theme === 'dark' ? '#000000' : '#ffffff',
-                }}
-              >
-                Connect
-              </button>
-            )}
-          </div>
+         <div className="mt-4 sm:mt-0">
+  {isOwner ? null : requestStatus === 'connected' ? (
+    <button
+      className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2"
+      style={{
+        backgroundColor: theme === 'dark' ? '#22c55e' : '#4ade80',
+        color: theme === 'dark' ? '#000000' : '#ffffff',
+      }}
+    >
+      <MessageCircle size={16} /> Message
+    </button>
+  ) : requestStatus === 'pending' ? (
+    <button
+      disabled
+      className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2 opacity-70 cursor-not-allowed"
+      style={{
+        backgroundColor: theme === 'dark' ? '#ff7300' : '#eab308',
+        color: theme === 'dark' ? '#000000' : '#ffffff',
+      }}
+    >
+      <Clock size={16} className="animate-pulse" /> Pending
+    </button>
+  ) : requestStatus === 'requested' ? (
+    <button
+      disabled
+      className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2 opacity-80 cursor-not-allowed"
+      style={{
+        backgroundColor: '#f9a8d4', // light pink
+        color: theme === 'dark' ? '#000000' : '#ffffff',
+      }}
+    >
+      Requested
+    </button>
+  ) : (
+    <button
+      onClick={handleConnect}
+      className="px-5 py-2 rounded-md text-sm font-bold shadow transition"
+      style={{
+        backgroundColor: theme === 'dark' ? '#ff7300' : '#3b82f6',
+        color: theme === 'dark' ? '#000000' : '#ffffff',
+      }}
+    >
+      Connect
+    </button>
+  )}
+</div>
+
 
 
 
