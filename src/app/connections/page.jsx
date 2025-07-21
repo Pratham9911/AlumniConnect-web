@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { MessageCircle, XCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
-
+import { Suspense } from 'react';
 export default function ConnectionsPage() {
   const { currentUser } = useAuth();
   const [connections, setConnections] = useState([]);
@@ -104,6 +104,8 @@ export default function ConnectionsPage() {
   }
 
   return (
+     <Suspense fallback={<div className="p-4">Loading...</div>}>
+
     <>
       <Navbar user={currentUser} />
       <div className="p-4 space-y-4">
@@ -178,6 +180,7 @@ export default function ConnectionsPage() {
         )}
       </div>
     </>
+     </Suspense>
 
   );
 }
