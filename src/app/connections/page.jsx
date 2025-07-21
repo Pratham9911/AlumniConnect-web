@@ -1,6 +1,6 @@
 // app/connections/page.jsx
 import { Suspense } from 'react';
-import ConnectionPageClient from './ConnectionPageClient';
+import ConnectionPageClient from '@/app/connections/ConnectionPageClient';
 
 export default function Page() {
   return (

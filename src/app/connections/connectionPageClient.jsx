@@ -132,19 +132,26 @@ export default function ConnectionPageClient() {
               </Link>
 
                {isOwner && (
-                <div className="flex gap-2">
-                  <button className="...">
+                <div className="perfect flex gap-2">
+                  <button
+                    className="px-2 py-1 sm:px-5 sm:py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2
+             text-blue-500 hover:text-blue-700 sm:text-white sm:bg-green-400 sm:hover:bg-green-500"
+                  >
                     <MessageCircle className="w-5 h-5" />
                     <span className="hidden sm:inline">Message</span>
                   </button>
 
-                  <button onClick={() => handleDelete(user.uid)} className="...">
+                  <button
+                    onClick={() => handleDelete(user.uid)}
+                    className="px-2 py-1 sm:px-5 sm:py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2
+             text-red-400 hover:text-black sm:text-white sm:bg-red-400 sm:hover:bg-red-500"
+                  >
                     <XCircle className="w-5 h-5" />
                     <span className="hidden sm:inline">Remove</span>
                   </button>
+
                 </div>
               )}
-
             </div>
           ))
         )}
