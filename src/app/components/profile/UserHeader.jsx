@@ -6,13 +6,14 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/firebase/config';
 import { FaWhatsapp, FaLinkedinIn, FaFacebookF, FaTwitter, FaPen } from 'react-icons/fa';
 import { uploadImageToCloudinary } from '@/lib/cloudinary';
-import { doc,  onSnapshot, updateDoc, getDoc, setDoc, serverTimestamp, arrayUnion ,   deleteDoc, arrayRemove } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, getDoc, setDoc, serverTimestamp, arrayUnion, deleteDoc, arrayRemove } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
 import { getCloudinarySignature } from '@/lib/cloudinary';
 import EditProfileModal from '@/app/components/profile/EditProfileModal';
 import { useTheme } from '@/app/context/ThemeContext';
 import { Clock, MessageCircle } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
+
 
 export default function UserHeader({ user, isOwner }) {
   const router = useRouter();
@@ -53,112 +54,112 @@ export default function UserHeader({ user, isOwner }) {
     }
   };
 
-//to check if B has Deleted A from Friends
-const cleanupDisconnectedFriends = async () => {
-  const myUid = currentUser.uid;
+  //to check if B has Deleted A from Friends
+  const cleanupDisconnectedFriends = async () => {
+    const myUid = currentUser.uid;
 
-  const mySnap = await getDoc(doc(db, 'users', myUid));
-  const myConnections = mySnap.data()?.connections || [];
+    const mySnap = await getDoc(doc(db, 'users', myUid));
+    const myConnections = mySnap.data()?.connections || [];
 
-  for (const friendUid of myConnections) {
-    const friendSnap = await getDoc(doc(db, 'users', friendUid));
-    const friendConnections = friendSnap.data()?.connections || [];
+    for (const friendUid of myConnections) {
+      const friendSnap = await getDoc(doc(db, 'users', friendUid));
+      const friendConnections = friendSnap.data()?.connections || [];
 
-    // If my UID is missing from their connections → remove them from mine
-    if (!friendConnections.includes(myUid)) {
-      await updateDoc(doc(db, 'users', myUid), {
-        connections: arrayRemove(friendUid),
-      });
-      console.log(`Removed stale connection: ${friendUid}`);
+      // If my UID is missing from their connections → remove them from mine
+      if (!friendConnections.includes(myUid)) {
+        await updateDoc(doc(db, 'users', myUid), {
+          connections: arrayRemove(friendUid),
+        });
+        console.log(`Removed stale connection: ${friendUid}`);
+      }
     }
-  }
-};
+  };
 
 
-// In UserHeader.jsx:
-const checkIfBAlreadyAccepted = async () => {
-  const senderUid = currentUser.uid;
-  const receiverUid = user.uid;
+  // In UserHeader.jsx:
+  const checkIfBAlreadyAccepted = async () => {
+    const senderUid = currentUser.uid;
+    const receiverUid = user.uid;
 
-  // Only continue if request still exists
-  const reqDoc = await getDoc(
-    doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`)
-  );
-  if (!reqDoc.exists()) return;
-
-  const receiverSnap = await getDoc(doc(db, 'users', receiverUid));
-  const receiverConnections = receiverSnap.data()?.connections || [];
-
-  if (receiverConnections.includes(senderUid)) {
-    // B accepted → A adds B (only once)
-    const senderRef = doc(db, 'users', senderUid);
-    const senderSnap = await getDoc(senderRef);
-    const myConnections = senderSnap.data()?.connections || [];
-
-    if (!myConnections.includes(receiverUid)) {
-      await updateDoc(senderRef, {
-        connections: [...myConnections, receiverUid],
-      });
-    }
-
-    // ✅ Remove request
-    await deleteDoc(doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`));
-
-    // ✅ Remove from pendingConnections
-    await updateDoc(senderRef, {
-      pendingConnections: arrayRemove(receiverUid),
-    });
-
-    setRequestStatus('connected');
-  }
-};
-
-
-useEffect(() => {
-  if (!currentUser || !user?.uid || currentUser.uid === user.uid) return;
-
-  const senderUid = currentUser.uid;  // A (viewer)
-  const receiverUid = user.uid;       // B (profile)
-
-  const unsubscribe = onSnapshot(doc(db, 'users', senderUid), async (docSnap) => {
-    const myConnections = docSnap.data()?.connections || [];
-
-    // 🧹 Cleanup broken connections
-    await cleanupDisconnectedFriends();
-
-    // ✅ Already connected
-    if (myConnections.includes(receiverUid)) {
-      setRequestStatus('connected');
-      return;
-    }
-
-    // ✅ B already accepted A's request
-    await checkIfBAlreadyAccepted();
-
-    // 🔍 A → B request (you sent the request)
-    const sentReqDoc = await getDoc(
+    // Only continue if request still exists
+    const reqDoc = await getDoc(
       doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`)
     );
-    if (sentReqDoc.exists()) {
-      setRequestStatus('pending');
-      return;
+    if (!reqDoc.exists()) return;
+
+    const receiverSnap = await getDoc(doc(db, 'users', receiverUid));
+    const receiverConnections = receiverSnap.data()?.connections || [];
+
+    if (receiverConnections.includes(senderUid)) {
+      // B accepted → A adds B (only once)
+      const senderRef = doc(db, 'users', senderUid);
+      const senderSnap = await getDoc(senderRef);
+      const myConnections = senderSnap.data()?.connections || [];
+
+      if (!myConnections.includes(receiverUid)) {
+        await updateDoc(senderRef, {
+          connections: [...myConnections, receiverUid],
+        });
+      }
+
+      // ✅ Remove request
+      await deleteDoc(doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`));
+
+      // ✅ Remove from pendingConnections
+      await updateDoc(senderRef, {
+        pendingConnections: arrayRemove(receiverUid),
+      });
+
+      setRequestStatus('connected');
     }
+  };
 
-    // 🔍 B → A request (they sent the request to you)
-    const incomingReqDoc = await getDoc(
-      doc(db, 'connectionRequests', senderUid, 'requests', `from_${receiverUid}`)
-    );
-    if (incomingReqDoc.exists()) {
-      setRequestStatus('requested'); // ✅ they sent you a request
-      return;
-    }
 
-    // ❌ No relationship
-    setRequestStatus('');
-  });
+  useEffect(() => {
+    if (!currentUser || !user?.uid || currentUser.uid === user.uid) return;
 
-  return () => unsubscribe();
-}, [currentUser?.uid, user?.uid]);
+    const senderUid = currentUser.uid;  // A (viewer)
+    const receiverUid = user.uid;       // B (profile)
+
+    const unsubscribe = onSnapshot(doc(db, 'users', senderUid), async (docSnap) => {
+      const myConnections = docSnap.data()?.connections || [];
+
+      // 🧹 Cleanup broken connections
+      await cleanupDisconnectedFriends();
+
+      // ✅ Already connected
+      if (myConnections.includes(receiverUid)) {
+        setRequestStatus('connected');
+        return;
+      }
+
+      // ✅ B already accepted A's request
+      await checkIfBAlreadyAccepted();
+
+      // 🔍 A → B request (you sent the request)
+      const sentReqDoc = await getDoc(
+        doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`)
+      );
+      if (sentReqDoc.exists()) {
+        setRequestStatus('pending');
+        return;
+      }
+
+      // 🔍 B → A request (they sent the request to you)
+      const incomingReqDoc = await getDoc(
+        doc(db, 'connectionRequests', senderUid, 'requests', `from_${receiverUid}`)
+      );
+      if (incomingReqDoc.exists()) {
+        setRequestStatus('requested'); // ✅ they sent you a request
+        return;
+      }
+
+      // ❌ No relationship
+      setRequestStatus('');
+    });
+
+    return () => unsubscribe();
+  }, [currentUser?.uid, user?.uid]);
 
   const handleConnect = async () => {
     try {
@@ -195,7 +196,15 @@ useEffect(() => {
   };
 
 
+  const handleClick = () => {
+    if (!user) return;
 
+    if (isOwner) {
+      router.push('/connections');
+    } else {
+      router.push(`/connections?uid=${user.uid}`);
+    }
+  };
 
   return (
     <div
@@ -290,58 +299,62 @@ useEffect(() => {
             <p className="text-sm mt-1">{user.role}</p>
             <p className="text-sm" >{user.workplace}</p>
             <p className="text-sm" >{user.country}</p>
-           <p className="text-sm mt-1">
-  <span className="font-semibold">{user?.connections?.length || 0}</span> connections
-</p>
+            <p
+              onClick={handleClick}
+              className="text-sm mt-1 cursor-pointer text-blue-500 hover:text-blue-700 transition"
+            >
+              <span className="font-semibold">{user?.connections?.length || 0}</span>{' '}
+              connections
+            </p>
 
           </div>
 
-         <div className="mt-4 sm:mt-0">
-  {isOwner ? null : requestStatus === 'connected' ? (
-    <button
-      className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2"
-      style={{
-        backgroundColor: theme === 'dark' ? '#22c55e' : '#4ade80',
-        color: theme === 'dark' ? '#000000' : '#ffffff',
-      }}
-    >
-      <MessageCircle size={16} /> Message
-    </button>
-  ) : requestStatus === 'pending' ? (
-    <button
-      disabled
-      className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2 opacity-70 cursor-not-allowed"
-      style={{
-        backgroundColor: theme === 'dark' ? '#ff7300' : '#eab308',
-        color: theme === 'dark' ? '#000000' : '#ffffff',
-      }}
-    >
-      <Clock size={16} className="animate-pulse" /> Pending
-    </button>
-  ) : requestStatus === 'requested' ? (
-    <button
-      disabled
-      className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2 opacity-80 cursor-not-allowed"
-      style={{
-        backgroundColor: '#f9a8d4', // light pink
-        color: theme === 'dark' ? '#000000' : '#ffffff',
-      }}
-    >
-      Requested
-    </button>
-  ) : (
-    <button
-      onClick={handleConnect}
-      className="px-5 py-2 rounded-md text-sm font-bold shadow transition"
-      style={{
-        backgroundColor: theme === 'dark' ? '#ff7300' : '#3b82f6',
-        color: theme === 'dark' ? '#000000' : '#ffffff',
-      }}
-    >
-      Connect
-    </button>
-  )}
-</div>
+          <div className="mt-4 sm:mt-0">
+            {isOwner ? null : requestStatus === 'connected' ? (
+              <button
+                className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2"
+                style={{
+                  backgroundColor: theme === 'dark' ? '#22c55e' : '#4ade80',
+                  color: theme === 'dark' ? '#000000' : '#ffffff',
+                }}
+              >
+                <MessageCircle size={16} /> Message
+              </button>
+            ) : requestStatus === 'pending' ? (
+              <button
+                disabled
+                className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2 opacity-70 cursor-not-allowed"
+                style={{
+                  backgroundColor: theme === 'dark' ? '#ff7300' : '#eab308',
+                  color: theme === 'dark' ? '#000000' : '#ffffff',
+                }}
+              >
+                <Clock size={16} className="animate-pulse" /> Pending
+              </button>
+            ) : requestStatus === 'requested' ? (
+              <button
+                disabled
+                className="px-5 py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2 opacity-80 cursor-not-allowed"
+                style={{
+                  backgroundColor: '#f9a8d4', // light pink
+                  color: theme === 'dark' ? '#000000' : '#ffffff',
+                }}
+              >
+                Requested
+              </button>
+            ) : (
+              <button
+                onClick={handleConnect}
+                className="px-5 py-2 rounded-md text-sm font-bold shadow transition"
+                style={{
+                  backgroundColor: theme === 'dark' ? '#ff7300' : '#3b82f6',
+                  color: theme === 'dark' ? '#000000' : '#ffffff',
+                }}
+              >
+                Connect
+              </button>
+            )}
+          </div>
 
 
 

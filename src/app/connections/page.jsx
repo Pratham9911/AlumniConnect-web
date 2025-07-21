@@ -5,6 +5,7 @@ import { db } from '@/app/firebase/config';
 import { useAuth } from '@/app/firebase/config';
 import { doc, getDoc, updateDoc, arrayRemove } from 'firebase/firestore';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { MessageCircle, XCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
@@ -12,6 +13,12 @@ export default function ConnectionsPage() {
   const { currentUser } = useAuth();
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const searchParams = useSearchParams();
+  const viewuid = searchParams.get('uid');
+  const isOwner = !viewuid || viewuid === currentUser?.uid;
+
+  const [viewedUser, setViewedUser] = useState(null);
 
   //to check if B has Deleted A from Friends
   const cleanupDisconnectedFriends = async () => {
@@ -39,7 +46,14 @@ export default function ConnectionsPage() {
       if (!currentUser) return;
 
       cleanupDisconnectedFriends();
-      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      const uidToFetch = viewuid || currentUser?.uid;
+      const userDoc = await getDoc(doc(db, 'users', uidToFetch));
+
+      if (userDoc.exists()) {
+
+        setViewedUser(userDoc.data());
+      }
+
       const uids = userDoc.data()?.connections || [];
 
       const results = await Promise.all(
@@ -93,7 +107,13 @@ export default function ConnectionsPage() {
     <>
       <Navbar user={currentUser} />
       <div className="p-4 space-y-4">
-        <h1 className="text-xl font-bold mb-4">Your Connections  {connections.length}</h1>
+        <h1 className="text-xl font-bold mb-4">
+          {isOwner
+            ? `Your Connections (${connections.length})`
+            : `${viewedUser?.name?.split(' ')[0] || 'User'}'s Connections (${connections.length})`}
+        </h1>
+
+
         {connections.length === 0 ? (
           <p className="text-sm text-gray-500">No connections yet.</p>
         ) : (
@@ -131,25 +151,28 @@ export default function ConnectionsPage() {
 
               </Link>
 
-              <div className="flex gap-2">
-                <button
-                  className="px-2 py-1 sm:px-5 sm:py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2
+              {isOwner && (
+                <div className="flex gap-2">
+                  <button
+                    className="px-2 py-1 sm:px-5 sm:py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2
              text-blue-500 hover:text-blue-700 sm:text-white sm:bg-green-400 sm:hover:bg-green-500"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  <span className="hidden sm:inline">Message</span>
-                </button>
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    <span className="hidden sm:inline">Message</span>
+                  </button>
 
-                <button
-                  onClick={() => handleDelete(user.uid)}
-                  className="px-2 py-1 sm:px-5 sm:py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2
+                  <button
+                    onClick={() => handleDelete(user.uid)}
+                    className="px-2 py-1 sm:px-5 sm:py-2 rounded-md text-sm font-bold shadow transition flex items-center gap-2
              text-red-400 hover:text-black sm:text-white sm:bg-red-400 sm:hover:bg-red-500"
-                >
-                  <XCircle className="w-5 h-5" />
-                  <span className="hidden sm:inline">Remove</span>
-                </button>
+                  >
+                    <XCircle className="w-5 h-5" />
+                    <span className="hidden sm:inline">Remove</span>
+                  </button>
 
-              </div>
+                </div>
+              )}
+
             </div>
           ))
         )}

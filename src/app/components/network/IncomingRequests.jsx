@@ -95,7 +95,7 @@ const handleDecline = async (senderUid) => {
   const receiverUid = currentUser.uid;
 
   try {
-    // Only B deletes the request they received from A
+    // 1. Delete the request document
     const reqRef = doc(
       db,
       'connectionRequests',
@@ -105,12 +105,19 @@ const handleDecline = async (senderUid) => {
     );
     await deleteDoc(reqRef);
 
-    // Remove it from UI
+    // 2. Remove receiverUid from sender's pendingConnections
+    const senderRef = doc(db, 'users', senderUid);
+    await updateDoc(senderRef, {
+      pendingConnections: arrayRemove(receiverUid),
+    });
+
+    // 3. Update UI
     setRequests((prev) => prev.filter((u) => u.uid !== senderUid));
   } catch (err) {
     console.error('Failed to decline request:', err);
   }
 };
+
 
 
 
