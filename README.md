@@ -22,7 +22,6 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 ### 🔹 1. User Profile  [16 july 25]
 - Complete profile system with photo, bio, education, and work.
 - Skills, interests, and achievements.
-- Goal tracker and certifications.
 
 ### 🔹 2. AI Chat Assistant *(Coming Soon)*  
 - Career advice & mentorship suggestions.
