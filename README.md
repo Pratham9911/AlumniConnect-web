@@ -93,12 +93,5 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 | Phase 5: Connection System   | Mutual request/response handling, secure writes                           | ✅ Done     |
 | Phase 6: Real-time Chatting System | One-to-one messaging using MongoDB, chat UI, and message persistence      | ⏳ Planned  |
 
----
 
-## 🚀 How to Run Locally
 
-```bash
-git clone https://github.com/your-username/alumniconnect.git
-cd alumniconnect
-npm install
-npm run dev
