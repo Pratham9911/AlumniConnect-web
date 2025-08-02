@@ -15,7 +15,10 @@
   --sidebar-border: #f1f1f4;
   --sidebar-border1: #f1f1f4;
   --search-placeholder: #676783;
-
+  --blue-search: #000000;
+  --blue-text: #000000;
+  --blue-bg:#ffffff;
+  --blue-searchBG: #f1eeee;
 }
 
 /* Dark Mode Class */
@@ -33,6 +36,11 @@
   --sidebar-border1: #000000;
   --search-text: #ff7300;
   --search-placeholder: #ff7300;
+  --blue-search: #a893ff;
+  --blue-text: #ffffff;
+  --blue-bg: #04030d;
+  --blue-bg: #04030d;
+  --blue-searchBG: #262252;
 }
 
 /* Global Base */

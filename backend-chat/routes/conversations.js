@@ -4,16 +4,16 @@ const Conversation = require("../models/Conversation");
 
 // Create or get existing 1-on-1 conversation
 router.post("/", async (req, res) => {
-  const { user1, user2 } = req.body;
+  const { senderId, receiverId } = req.body;
 
   try {
-    // Check if conversation exists
     let conversation = await Conversation.findOne({
-      members: { $all: [user1, user2] }
+      members: { $all: [senderId, receiverId] },
+      $expr: { $eq: [{ $size: "$members" }, 2] }, // Ensure it's strictly 1-to-1
     });
 
     if (!conversation) {
-      conversation = new Conversation({ members: [user1, user2] });
+      conversation = new Conversation({ members: [senderId, receiverId] });
       await conversation.save();
     }
 
@@ -22,6 +22,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: "Failed to create/get conversation." });
   }
 });
+
 
 // Get all conversations for a user
 router.get("/:uid", async (req, res) => {

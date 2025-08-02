@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter , useParams } from 'next/navigation';
 import { useAuth } from '@/app/firebase/config';
 import { FaWhatsapp, FaLinkedinIn, FaFacebookF, FaTwitter, FaPen } from 'react-icons/fa';
 import { uploadImageToCloudinary } from '@/lib/cloudinary';
@@ -13,9 +13,9 @@ import EditProfileModal from '@/app/components/profile/EditProfileModal';
 import { useTheme } from '@/app/context/ThemeContext';
 import { Clock, MessageCircle } from 'lucide-react';
 import imageCompression from 'browser-image-compression';
-
-
+import { startConversation } from '@/utils/startConversation';
 export default function UserHeader({ user, isOwner }) {
+  const { uid: profileUid } = useParams();
   const router = useRouter();
   const fileInputRef = useRef(null);
   const bgInputRef = useRef(null);
@@ -30,7 +30,7 @@ export default function UserHeader({ user, isOwner }) {
     try {
       setUpdating(true);
 
-      // ✅ Compress the image
+
       const compressedFile = await imageCompression(file, {
         maxSizeMB: 0.1,              // Try to keep under 200 KB
         maxWidthOrHeight: 600,       // Resize large images (600px max)
@@ -102,10 +102,10 @@ export default function UserHeader({ user, isOwner }) {
         });
       }
 
-      // ✅ Remove request
+
       await deleteDoc(doc(db, 'connectionRequests', receiverUid, 'requests', `from_${senderUid}`));
 
-      // ✅ Remove from pendingConnections
+
       await updateDoc(senderRef, {
         pendingConnections: arrayRemove(receiverUid),
       });
@@ -317,6 +317,14 @@ export default function UserHeader({ user, isOwner }) {
                   backgroundColor: theme === 'dark' ? '#22c55e' : '#4ade80',
                   color: theme === 'dark' ? '#000000' : '#ffffff',
                 }}
+
+                onClick={() =>
+                  startConversation({
+                    senderId: currentUser?.uid,
+                    receiverId: profileUid, // UID of the profile you're viewing
+                    router,
+                  })
+                }
               >
                 <MessageCircle size={16} /> Message
               </button>

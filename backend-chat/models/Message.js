@@ -8,7 +8,11 @@ const messageSchema = new mongoose.Schema({
   isDeleted: { type: Boolean, default: false },
   deletedBy: {
   type: [String],
-  default: []
+  default: [],
+  seenBy: {
+    type: [String], // Firebase UIDs
+    default: []
+  }
 },
   createdAt: {
     type: Date,

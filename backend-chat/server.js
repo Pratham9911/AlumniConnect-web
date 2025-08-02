@@ -9,8 +9,8 @@ const { Server } = require('socket.io');
 const conversationRoutes = require('./routes/conversations')
 const messageRoutes = require('./routes/messages')
 
-const socketHandler = require("./sockets/chat");
-socketHandler(io);
+const socketHandler = require("./sockets/chats");
+
 
 
 dotenv.config();
@@ -23,6 +23,28 @@ const io = new Server(server , {
         methods: ['GET','POST']
     }
 });
+
+const onlineUsers = new Set();
+
+io.on('connection', (socket) => {
+  // When frontend emits 'user-online'
+  socket.on('user-online', (uid) => {
+    socket.uid = uid;
+    onlineUsers.add(uid);
+    io.emit('online-users', Array.from(onlineUsers)); // broadcast online list
+  });
+
+  // When user disconnects
+  socket.on('disconnect', () => {
+    if (socket.uid) {
+      onlineUsers.delete(socket.uid);
+      io.emit('online-users', Array.from(onlineUsers));
+    }
+  });
+});
+
+socketHandler(io);
+
 
 app.use(cors());
 app.use(express.json());

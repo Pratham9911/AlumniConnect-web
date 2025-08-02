@@ -21,6 +21,38 @@ router.post("/", async (req, res) => {
   }
 });
 
+
+// GET unread message count for user
+router.get("/unread/:uid", async (req, res) => {
+  const { uid } = req.params;
+
+  try {
+    const messages = await Message.aggregate([
+      {
+        $match: {
+          sender: { $ne: uid },
+          seenBy: { $ne: uid }
+        }
+      },
+      {
+        $group: {
+          _id: "$conversationId",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const unreadMap = {};
+    messages.forEach((m) => {
+      unreadMap[m._id] = m.count;
+    });
+
+    res.status(200).json(unreadMap);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to get unread count." });
+  }
+});
+
 // Get all messages for a conversation (paginated)
 router.get("/:conversationId", async (req, res) => {
   const { conversationId } = req.params;

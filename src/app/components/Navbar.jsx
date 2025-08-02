@@ -64,7 +64,7 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
         <nav className="hidden md:flex gap-6 text-sm font-medium">
           {[
             { label: 'Home', href: '/dashboard' },
-            { label: 'Chats', href: '/chats' },
+            { label: 'Chats', href: '/chat' },
             { label: 'Community', href: '/community' },
             { label: 'AI', href: '/ai' },
 
@@ -136,7 +136,7 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
         <div className="flex justify-around py-2">
           {[
             { label: 'Home', href: '/dashboard', icon: Home },
-            { label: 'Messages', href: '/chats', icon: MessageSquare },
+            { label: 'Messages', href: '/chat', icon: MessageSquare },
             { label: 'Community', href: '/community', icon: Users },
             { label: 'AI', href: '/ai', icon: Brain },
 
