@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 export const startConversation = async ({ senderId, receiverId, router }) => {
   try {
     // Send request to backend to create/get conversation
-    const res = await axios.post('http://localhost:5000/api/conversations', {
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/api/conversations`, {
       senderId,
       receiverId,
     });

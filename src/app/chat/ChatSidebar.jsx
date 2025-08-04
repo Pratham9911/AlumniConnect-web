@@ -11,7 +11,10 @@ import { Home, MessageSquare, Users, Brain } from 'lucide-react'; // icons for n
 import { io } from 'socket.io-client';
 
 export default function ChatSidebar() {
-    const socket = io('http://localhost:5000'); // or your live backend URL
+   const socket = io(`${process.env.NEXT_PUBLIC_API_BASE}`, {
+  transports: ['websocket'], // forces WS only (skip polling)
+  withCredentials: true,
+}); // or your live backend URL
     const { currentUser, theme } = useAuth();
     const [conversations, setConversations] = useState([]);
     const [search, setSearch] = useState('');
@@ -37,7 +40,7 @@ export default function ChatSidebar() {
         if (!currentUser?.uid) return;
 
         const fetchConversations = async () => {
-            const res = await axios.get(`http://localhost:5000/api/conversations/${currentUser.uid}`);
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/api/conversations/${currentUser.uid}`);
             setConversations(res.data);
 
             const userMap = {};

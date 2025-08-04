@@ -6,7 +6,7 @@ import { useAuth } from '@/app/firebase/config';
 import { io } from 'socket.io-client';
 import axios from 'axios';
 
-const socket = io('http://localhost:5000'); // or your live URL
+const socket = io(`${process.env.NEXT_PUBLIC_API_BASE}`); // or your live URL
 
 export default function ChatWithUser() {
   const { uid: otherUserUid } = useParams(); // UID of the user you're chatting with
@@ -27,7 +27,7 @@ export default function ChatWithUser() {
 
     const setupChat = async () => {
       try {
-        const res = await axios.post('http://localhost:5000/api/conversations', {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/api/conversations`, {
           senderId: currentUser.uid,
           receiverId: otherUserUid,
         });
@@ -40,7 +40,7 @@ export default function ChatWithUser() {
 
         // Fetch previous messages
         const msgRes = await axios.get(
-          `http://localhost:5000/api/messages/${convo._id}?limit=50`
+          `${process.env.NEXT_PUBLIC_API_BASE}/api/messages/${convo._id}?limit=50`
         );
         setMessages(msgRes.data);
       } catch (err) {
