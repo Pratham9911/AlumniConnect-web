@@ -15,6 +15,6 @@ export const startConversation = async ({ senderId, receiverId, router }) => {
     }
   } catch (err) {
     console.error('Error starting conversation:', err.message);
-    alert('Could not start chat.');
+    alert( err.message);
   }
 };
