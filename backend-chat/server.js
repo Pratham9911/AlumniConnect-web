@@ -59,9 +59,10 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-app.get('/',(res,req) => {
-    res.send("Alumni chat API is running...");
-})
+app.get('/', (req, res) => {
+  res.send("Alumni chat API is running...");
+});
+
 
 
 
