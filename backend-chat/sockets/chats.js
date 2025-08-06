@@ -14,27 +14,32 @@ function socketHandler(io) {
     });
 
    //this is for Mark as read
-   socket.on('mark-messages-seen',async({conversationId,userId}) => {
-      console.log(`➡️ Marking messages as seen by ${userId} in ${conversationId}`);
-   
-    try{
-        await Message.updateMany(
-          {
-            conversationId,
-          seenBy: { $ne: userId},
-        sender: {$ne: userId}   
-             },
-             {
-               $addToSet: { seenBy: userId}
-             }
-        )
-  console.log(`✅ ${result.modifiedCount} messages updated`);
-        io.to(conversationId).emit('messages-seen', { conversationId, seenBy:userId });
+ socket.on('mark-messages-seen', async ({ conversationId, userId }) => {
+  console.log(`➡️ Marking messages as seen by ${userId} in ${conversationId}`);
+
+  try {
+    const result = await Message.updateMany(
+      {
+        conversationId,
+        seenBy: { $ne: userId },
+        sender: { $ne: userId },
+      },
+      {
+        $addToSet: { seenBy: userId },
       }
-      catch(err){
-         console.error
-      }
-   });
+    );
+
+    console.log(`✅ ${result.modifiedCount} messages updated`);
+
+    io.to(conversationId).emit('messages-seen-update', {
+      conversationId,
+      seenBy: userId,
+    });
+  } catch (err) {
+    console.error("❌ Error marking messages as seen:", err);
+  }
+});
+
 
 
     // Send a new message
@@ -45,7 +50,8 @@ function socketHandler(io) {
         conversationId,
         sender,
         text,
-        imageUrl
+        imageUrl,
+        seenBy: [sender]
       });
 
       await message.save();

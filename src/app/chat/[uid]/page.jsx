@@ -8,11 +8,11 @@ import axios from 'axios';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
 
-const socket = io(`${process.env.NEXT_PUBLIC_API_BASE}`); // or your live URL
-
 export default function ChatWithUser() {
   const { uid: otherUserUid } = useParams(); // UID of the user you're chatting with
   const { currentUser, theme } = useAuth();
+  const socketRef = useRef(null);
+
   const [otherUser, setOtherUser] = useState({ name: '', image: null });
   const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -23,7 +23,29 @@ export default function ChatWithUser() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // STEP 1: Setup conversation
+  // ✅ 1. Setup socket once
+  useEffect(() => {
+    socketRef.current = io(`${process.env.NEXT_PUBLIC_API_BASE}`);
+    return () => socketRef.current.disconnect();
+  }, []);
+
+  // ✅ 2. Re-join conversation on connect + mount
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!conversationId || !socket) return;
+
+    const handleJoin = () => {
+      console.log("📡 Rejoining room:", conversationId);
+      socket.emit('join-conversation', conversationId);
+    };
+
+    socket.on('connect', handleJoin);
+    handleJoin();
+
+    return () => socket.off('connect', handleJoin);
+  }, [conversationId]);
+
+  // ✅ 3. Setup conversation and fetch messages
   useEffect(() => {
     if (!currentUser?.uid || !otherUserUid) return;
 
@@ -37,10 +59,8 @@ export default function ChatWithUser() {
         const convo = res.data;
         setConversationId(convo._id);
 
-        // Join socket room
-        socket.emit('join-conversation', convo._id);
+        socketRef.current.emit('join-conversation', convo._id);
 
-        // Fetch previous messages
         const msgRes = await axios.get(
           `${process.env.NEXT_PUBLIC_API_BASE}/api/messages/${convo._id}?limit=50`
         );
@@ -62,8 +82,9 @@ export default function ChatWithUser() {
     setupChat();
   }, [otherUserUid, currentUser]);
 
-  // STEP 2: Listen for new incoming messages
+  // ✅ 4. Receive new message
   useEffect(() => {
+    const socket = socketRef.current;
     socket.on('receive-message', (newMsg) => {
       setMessages((prev) => [...prev, newMsg]);
     });
@@ -71,7 +92,48 @@ export default function ChatWithUser() {
     return () => socket.off('receive-message');
   }, []);
 
-  // STEP 3: Scroll to bottom on new messages
+  // ✅ 5. Mark messages as seen
+  useEffect(() => {
+  const socket = socketRef.current;
+
+  if (!conversationId || !currentUser?.uid || !socket) return;
+
+  // Only emit mark seen AFTER joining room
+  const timeout = setTimeout(() => {
+    console.log('📤 Emitting mark-messages-seen:', conversationId, currentUser.uid);
+    socket.emit('mark-messages-seen', {
+      conversationId,
+      userId: currentUser.uid,
+    });
+  }, 500); // delay to ensure room is joined
+
+  return () => clearTimeout(timeout);
+}, [conversationId, currentUser?.uid]);
+
+  // ✅ 6. Update seenBy in real-time
+  useEffect(() => {
+    const socket = socketRef.current;
+    socket.on('messages-seen-update', ({ conversationId: updatedId, seenBy }) => {
+      if (updatedId === conversationId) {
+        console.log("📥 Received messages-seen-update:", updatedId, seenBy);
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => {
+            if (!msg.seenBy?.includes(seenBy)) {
+              console.log("👀 Updating seenBy in msg:", msg.text);
+              return {
+                ...msg,
+                seenBy: [...(msg.seenBy || []), seenBy],
+              };
+            }
+            return msg;
+          })
+        );
+      }
+    });
+
+    return () => socket.off('messages-seen-update');
+  }, [conversationId]);
+
   useEffect(scrollToBottom, [messages]);
 
   const sendMessage = () => {
@@ -83,19 +145,9 @@ export default function ChatWithUser() {
       text,
     };
 
-    socket.emit('send-message', msgData);
+    socketRef.current.emit('send-message', msgData);
     setText('');
   };
-
-useEffect(() => {
-  if (socket && conversationId && currentUser?.uid) {
-    console.log('📤 Emitting mark-messages-seen:', conversationId, currentUser.uid);
-    socket.emit('mark-messages-seen', {
-      conversationId,
-      userId: currentUser.uid
-    });
-  }
-}, [socket, conversationId, currentUser?.uid]);
 
   const formatTime = (dateStr) => {
     const date = new Date(dateStr);
@@ -120,14 +172,13 @@ useEffect(() => {
         }}
       >
         <div className="flex items-center gap-3">
-  {otherUser.image ? (
-    <img src={otherUser.image} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
-  ) : (
-    <div className="w-8 h-8 rounded-full bg-gray-300" />
-  )}
-  <span>{otherUser.name}</span>
-</div>
-
+          {otherUser.image ? (
+            <img src={otherUser.image} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-300" />
+          )}
+          <span>{otherUser.name}</span>
+        </div>
       </div>
 
       {/* Messages */}
@@ -159,8 +210,6 @@ useEffect(() => {
                   {msg.sender === currentUser.uid ? (
                     msg.seenBy?.includes(otherUserUid) ? " ✓✓" : " ✓"
                   ) : null}
-
-
                 </div>
               </div>
             </div>

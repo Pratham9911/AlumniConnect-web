@@ -9,17 +9,18 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/app/firebase/config';
 import { Home, MessageSquare, Users, Brain } from 'lucide-react'; // icons for navbar
 import { io } from 'socket.io-client';
+import { Loader2 } from 'lucide-react';
 
 export default function ChatSidebar() {
-   const socket = io(`${process.env.NEXT_PUBLIC_API_BASE}`, {
-  transports: ['websocket'], // forces WS only (skip polling)
-  withCredentials: true,
-}); // or your live backend URL
+    const socket = io(`${process.env.NEXT_PUBLIC_API_BASE}`, {
+        transports: ['websocket'], // forces WS only (skip polling)
+        withCredentials: true,
+    }); // or your live backend URL
     const { currentUser, theme } = useAuth();
     const [conversations, setConversations] = useState([]);
     const [search, setSearch] = useState('');
     const [userInfoMap, setUserInfoMap] = useState({});
-
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!currentUser?.uid) return;
@@ -40,32 +41,40 @@ export default function ChatSidebar() {
         if (!currentUser?.uid) return;
 
         const fetchConversations = async () => {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/api/conversations/${currentUser.uid}`);
-            setConversations(res.data);
+            setLoading(true); 
+            try {
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE}/api/conversations/${currentUser.uid}`);
+                setConversations(res.data);
 
-            const userMap = {};
-            await Promise.all(
-                res.data.map(async (conv) => {
-                    const otherUid = conv.members.find((m) => m !== currentUser.uid);
-                    if (!otherUid) return;
-                    try {
-                        const snap = await getDoc(doc(db, 'users', otherUid));
-                        const data = snap.exists() ? snap.data() : null;
-                        userMap[otherUid] = {
-                            name: data?.name || 'User',
-                            image: data?.profileImageUrl || null,
-                        };
-                    } catch (err) {
-                        userMap[otherUid] = {
-                            name: 'User',
-                            image: null,
-                        };
-                    }
-                })
-            );
+                const userMap = {};
+                await Promise.all(
+                    res.data.map(async (conv) => {
+                        const otherUid = conv.members.find((m) => m !== currentUser.uid);
+                        if (!otherUid) return;
+                        try {
+                            const snap = await getDoc(doc(db, 'users', otherUid));
+                            const data = snap.exists() ? snap.data() : null;
+                            userMap[otherUid] = {
+                                name: data?.name || 'User',
+                                image: data?.profileImageUrl || null,
+                            };
+                        } catch (err) {
+                            userMap[otherUid] = {
+                                name: 'User',
+                                image: null,
+                            };
+                        }
+                    })
+                );
 
-            setUserInfoMap(userMap);
+                setUserInfoMap(userMap);
+            } catch (error) {
+                console.error('Error fetching conversations:', error);
+            } finally {
+                setLoading(false); 
+            }
         };
+
 
         fetchConversations();
     }, [currentUser]);
@@ -133,47 +142,52 @@ export default function ChatSidebar() {
 
 
             {/* Chat List */}
-            <div className="flex-1 overflow-y-auto pb-[56px]">
-                {filtered.map((conv) => {
-                    const otherUid = conv.members.find((m) => m !== currentUser.uid);
-                    const info = userInfoMap[otherUid] || {};
-                    return (
-                        <Link key={conv._id} href={`/chat/${otherUid}`}>
-                            <div
-                                className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--search-bg)] cursor-pointer transition-all"
-                                style={{
-                                    borderColor: theme === 'dark' ? '#ffffff20' : '#f1f1f4',
-                                    borderRadius: '0.5rem',
-                                }}
-                            >
-                                <div className="relative">
-                                    <img
-                                        src={info.image || 'https://cdn-icons-png.flaticon.com/512/295/295128.png'}
-                                        alt="avatar"
-                                        className="w-10 h-10 rounded-full object-cover"
-                                    />
-                                    {onlineUsers.includes(otherUid) && (
-                                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
-                                    )}
-                                </div>
+           <div className="flex-1 overflow-y-auto pb-[56px]">
+    {loading ? (
+        
+        <div className="flex flex-col justify-center items-center h-full space-y-2">
+  <h1 className="text-sm font-medium text-gray-500">Loading Chats...</h1>
+  <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+</div>
 
-                                <div className="flex-1">
-                                    <div className="font-medium text-sm">{info.name || otherUid}</div>
-                                    {onlineUsers.includes(otherUid) ?
-                                        (
-                                            <div className="text-sm text-green-500 truncate">
-                                                 Online
-                                            </div>
-                                        ) : <div className="text-sm text-gray-400 truncate">
-                                             Offline
-                                        </div>}
+    ) : (
+        filtered.map((conv) => {
+            const otherUid = conv.members.find((m) => m !== currentUser.uid);
+            const info = userInfoMap[otherUid] || {};
+            return (
+                <Link key={conv._id} href={`/chat/${otherUid}`}>
+                    <div
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--search-bg)] cursor-pointer transition-all"
+                        style={{
+                            borderColor: theme === 'dark' ? '#ffffff20' : '#f1f1f4',
+                            borderRadius: '0.5rem',
+                        }}
+                    >
+                        <div className="relative">
+                            <img
+                                src={info.image || ''}
+                                alt="avatar"
+                                className="w-10 h-10 rounded-full object-cover"
+                            />
+                            {onlineUsers.includes(otherUid) && (
+                                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+                            )}
+                        </div>
+                        <div className="flex-1">
+                            <div className="font-medium text-sm">{info.name}</div>
+                            {onlineUsers.includes(otherUid) ? (
+                                <div className="text-sm text-green-500 truncate">Online</div>
+                            ) : (
+                                <div className="text-sm text-gray-400 truncate">Offline</div>
+                            )}
+                        </div>
+                    </div>
+                </Link>
+            );
+        })
+    )}
+</div>
 
-                                </div>
-                            </div>
-                        </Link>
-                    );
-                })}
-            </div>
 
             {/* Bottom Navbar (mobile only) */}
             <nav

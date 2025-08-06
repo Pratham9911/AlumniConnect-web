@@ -9,11 +9,12 @@ const messageSchema = new mongoose.Schema({
   deletedBy: {
   type: [String],
   default: [],
-  seenBy: {
+  
+},
+seenBy: {
     type: [String], // Firebase UIDs
     default: []
-  }
-},
+  },
   createdAt: {
     type: Date,
     default: Date.now
