@@ -5,13 +5,15 @@ import { useParams } from 'next/navigation';
 import { useAuth } from '@/app/firebase/config';
 import { io } from 'socket.io-client';
 import axios from 'axios';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/app/firebase/config';
 
 const socket = io(`${process.env.NEXT_PUBLIC_API_BASE}`); // or your live URL
 
 export default function ChatWithUser() {
   const { uid: otherUserUid } = useParams(); // UID of the user you're chatting with
   const { currentUser, theme } = useAuth();
-
+  const [otherUser, setOtherUser] = useState({ name: '', image: null });
   const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
@@ -43,6 +45,15 @@ export default function ChatWithUser() {
           `${process.env.NEXT_PUBLIC_API_BASE}/api/messages/${convo._id}?limit=50`
         );
         setMessages(msgRes.data);
+
+        const userSnap = await getDoc(doc(db, 'users', otherUserUid));
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+          setOtherUser({
+            name: data.name || 'User',
+            image: data.profileImageUrl || null,
+          });
+        }
       } catch (err) {
         console.error('Chat setup error:', err.message);
       }
@@ -76,6 +87,16 @@ export default function ChatWithUser() {
     setText('');
   };
 
+useEffect(() => {
+  if (socket && conversationId && currentUser?.uid) {
+    console.log('📤 Emitting mark-messages-seen:', conversationId, currentUser.uid);
+    socket.emit('mark-messages-seen', {
+      conversationId,
+      userId: currentUser.uid
+    });
+  }
+}, [socket, conversationId, currentUser?.uid]);
+
   const formatTime = (dateStr) => {
     const date = new Date(dateStr);
     return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
@@ -98,7 +119,15 @@ export default function ChatWithUser() {
           color: theme === 'dark' ? '#ff7300' : '#111827',
         }}
       >
-        Chat with {otherUserUid}
+        <div className="flex items-center gap-3">
+  {otherUser.image ? (
+    <img src={otherUser.image} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+  ) : (
+    <div className="w-8 h-8 rounded-full bg-gray-300" />
+  )}
+  <span>{otherUser.name}</span>
+</div>
+
       </div>
 
       {/* Messages */}
@@ -119,15 +148,19 @@ export default function ChatWithUser() {
                       ? '#ff7300'
                       : '#2563eb'
                     : theme === 'dark'
-                    ? '#1f1f1f'
-                    : '#ffffff',
+                      ? '#1f1f1f'
+                      : '#ffffff',
                   color: isMe ? '#fff' : theme === 'dark' ? '#ededed' : '#111827',
                 }}
               >
                 <div>{msg.text}</div>
                 <div className="text-xs mt-1 text-right opacity-70">
                   {formatTime(msg.createdAt)}
-                  {/* Future: ✅✓ ticks for seen */}
+                  {msg.sender === currentUser.uid ? (
+                    msg.seenBy?.includes(otherUserUid) ? " ✓✓" : " ✓"
+                  ) : null}
+
+
                 </div>
               </div>
             </div>

@@ -13,6 +13,30 @@ function socketHandler(io) {
       console.log(`User joined conversation: ${conversationId}`);
     });
 
+   //this is for Mark as read
+   socket.on('mark-messages-seen',async({conversationId,userId}) => {
+      console.log(`➡️ Marking messages as seen by ${userId} in ${conversationId}`);
+   
+    try{
+        await Message.updateMany(
+          {
+            conversationId,
+          seenBy: { $ne: userId},
+        sender: {$ne: userId}   
+             },
+             {
+               $addToSet: { seenBy: userId}
+             }
+        )
+  console.log(`✅ ${result.modifiedCount} messages updated`);
+        io.to(conversationId).emit('messages-seen', { conversationId, seenBy:userId });
+      }
+      catch(err){
+         console.error
+      }
+   });
+
+
     // Send a new message
     socket.on("send-message", async (data) => {
       const { conversationId, sender, text, imageUrl } = data;

@@ -5,15 +5,13 @@ const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
 
+dotenv.config();
 
 const conversationRoutes = require('./routes/conversations')
 const messageRoutes = require('./routes/messages')
 
 const socketHandler = require("./sockets/chats");
 
-
-
-dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -52,6 +50,13 @@ app.use(express.json());
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 
+const mongoUri = process.env.MONGODB_URI;
+if (!mongoUri) {
+  console.error("❌ MONGODB_URI is not defined in environment variables");
+  process.exit(1);
+}
+
+
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -71,11 +76,11 @@ server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-io.on('connection',(socket) => {
-    console.log('New client connected:', socket.id);
+// io.on('connection',(socket) => {
+//     console.log('New client connected:', socket.id);
     
-    socket.on('disconnect', () => {
-        console.log('Client disconnected:', socket.id);
-    });
+//     socket.on('disconnect', () => {
+//         console.log('Client disconnected:', socket.id);
+//     });
     
-})
+// })
