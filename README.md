@@ -1,5 +1,5 @@
-# ⭐ AlumniConnect  
-### 🌐 **Alumni & Community Networking Web Platform with AI Integration**
+#  🌐 AlumniConnect  
+### **Alumni & Community Networking Web Platform with AI Integration**
 
 ---
 
@@ -17,7 +17,7 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 
 ---
 
-## 🚀 Project Development Phases
+## 📈 Project Development Phases
 
 ### **Phase 1: Core Features**
 
