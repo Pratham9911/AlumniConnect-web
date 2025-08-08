@@ -17,6 +17,36 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 
 ---
 
+## 🚀 Project Development Phases
+
+### **Phase 1: Core Features**
+
+- ✅ **Requirements & Architecture Defined**
+- ✅ **User Authentication** (Login / Registration)
+- ✅ **Home Page Layout**
+- ✅ **User Profile Page**
+- ✅ **Dark Theme Support**
+- ✅ **Search Users**
+- ✅ **Connection System** (Send/Accept Requests)
+- ✅ **Friend List View**
+- 🚧 **Real-time Chat System**
+- 🔲 **Post Creation & Sharing System**
+- 🔲 **Personalized Feed System**
+
+### **Phase 2: Advanced Networking Features**
+
+- 🔲 **Alumni Community Groups**
+- 🔲 **Advanced User Filtering**
+- 🔲 **Alumni Recommendation System**
+
+### **Phase 3: AI/ML Integration** 🤖  
+> ⚠️ Built entirely **from scratch** (no external APIs). Designed to handle small-scale data efficiently.
+
+- 🔲 **User Behavior Analytics**
+- 🔲 **AC-GPT (Mini Assistant)**
+
+
+---
 ## 🔑 Key Features
 
 ### 🔹 1. User Profile  [16 july 25]
@@ -68,7 +98,6 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 - Firebase – Realtime database, auth, and hosting  
 
 ---
-
 ## 📜 Project Journey
 
 | Date Range         | Milestone                                           | Status       |
@@ -78,20 +107,5 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 | 6–16 July 2025     |  User Profile Page (with Firestore + Cloudinary) | ✅ Completed |
 | 17–21 July 2025    | 🔗 Friend/Connection System with Firestore          | ✅ Completed |
 | 22 July – Aug 2025 | Real-time chatting system             | ⏳ In Progress |
-
-
----
-
-## 📅 Project Phases & Timeline
-
-| Phase                         | Description                                                                 | Status     |
-|------------------------------|-----------------------------------------------------------------------------|------------|
-| Phase 1: Planning & Research | Feature finalization, tech stack, AI use-cases                             | ✅ Done     |
-| Phase 2: UI/UX Design        | Wireframes, flowcharts, and prototyping in Figma                          | ✅ Done     |
-| Phase 3: Auth + Firestore    | Firebase setup, user profile schema, storage                              | ✅ Done     |
-| Phase 4: Profile System      | Section-based dynamic profile, editable entries, image support            | ✅ Done     |
-| Phase 5: Connection System   | Mutual request/response handling, secure writes                           | ✅ Done     |
-| Phase 6: Real-time Chatting System | One-to-one messaging using MongoDB, chat UI, and message persistence      | ⏳ Planned  |
-
 
 
