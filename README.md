@@ -87,15 +87,16 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 - **File Uploads**: Cloudinary (profile & background images)
 
 ### 🧩 Backend & Database
-- **Database**: Firebase Firestore (NoSQL)
+- **Database**: Firebase Firestore (NoSQL) , MongoDB
 - **Hosting**: Vercel
-- **AI Assistant**: (Planned) OpenAI API or custom NLP model via Python backend
+- **AI Assistant**: (Planned) custom NLP model via Python backend
 
 ### 🧩 Tools
 - Figma – UI/UX prototyping  
 - GitHub – Version control  
 - Cloudinary – Image storage  
-- Firebase – Realtime database, auth, and hosting  
+- Firebase – Realtime database, auth, and hosting
+- MongoDB - Realtime database , User's Chats and Posts
 
 ---
 ## 📜 Project Journey
@@ -106,6 +107,6 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 | 1-5 July 2025       | Project Started (Frontend + Firebase)            | ✅ Completed |
 | 6–16 July 2025     |  User Profile Page (with Firestore + Cloudinary) | ✅ Completed |
 | 17–21 July 2025    | 🔗 Friend/Connection System with Firestore          | ✅ Completed |
-| 22 July – Aug 2025 | Real-time chatting system             | ⏳ In Progress |
+| 22 July – Aug 2025 | Real-time chatting system using MongoDB           | ⏳ In Progress |
 
 
