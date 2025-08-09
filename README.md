@@ -20,7 +20,7 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 ## 📈 Project Development Phases
 
 ### **Phase 1: Core Features**
-
+> *(JULY 2025)*
 - ✅ **Requirements & Architecture Defined**
 - ✅ **User Authentication** (Login / Registration)
 - ✅ **Home Page Layout**
