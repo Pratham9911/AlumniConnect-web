@@ -32,6 +32,7 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 - 🚧 **Real-time Chat System**
 - 🔲 **Post Creation & Sharing System**
 - 🔲 **Personalized Feed System**
+> *(SEPTEMBER 2025)*
 
 ### **Phase 2: Advanced Networking Features**
 
