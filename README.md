@@ -37,12 +37,14 @@ Built with modern web technologies and Firebase backend, **AlumniConnect** is op
 
 - 🔲 **Alumni Community Groups**
 - 🔲 **Advanced User Filtering**
+- 🔲 **Mutual Connections Indicator**
 - 🔲 **Alumni Recommendation System**
 
 ### **Phase 3: AI/ML Integration** 🤖  
 > ⚠️ Built entirely **from scratch** (no external APIs). Designed to handle small-scale data efficiently.
 
 - 🔲 **User Behavior Analytics**
+- 🔲 **Custom Dataset Training for AC-GPT**
 - 🔲 **AC-GPT (Mini Assistant)**
 
 
