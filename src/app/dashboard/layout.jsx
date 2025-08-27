@@ -10,19 +10,16 @@ import defaultUser from '../images/default_user.png';
 import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import {
-  Bell,
-  Search,
-  Home,
-  MessageSquare,
+
   Users,
-  Brain,
+  
   User,
   Settings,
   Info,
   LogOut,
   Image as ImageIcon,
   Hash,
-  Menu,
+ 
   X
 } from 'lucide-react';
 

@@ -11,6 +11,7 @@ import { Home, MessageSquare, Users, Brain } from 'lucide-react'; // icons for n
 import { io } from 'socket.io-client';
 import { Loader2 } from 'lucide-react';
 
+
 export default function ChatSidebar() {
     const socket = io(`${process.env.NEXT_PUBLIC_API_BASE}`, {
         transports: ['websocket'], // forces WS only (skip polling)
@@ -88,6 +89,7 @@ export default function ChatSidebar() {
 
     return (
         <div
+         
             className="flex flex-col h-full w-full md:w-[380px]"
             style={{
 
@@ -98,7 +100,7 @@ export default function ChatSidebar() {
             }}
 
         >
-
+   
             {/* Header */}
             <div
                 className="px-4 py-3 text-xl font-bold"

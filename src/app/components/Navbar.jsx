@@ -18,7 +18,7 @@ const Navbar = ({ setSidebarOpen = null, user = null }) => {
     <>
       {/* Top Navbar */}
       <header
-        className="flex items-center justify-between border-b px-4 md:px-10 py-3 gap-4"
+        className="flex items-center justify-between  px-4 md:px-10 py-3 gap-4"
         style={{
           backgroundColor: 'var(--navbar-bg)',
           borderColor: 'var(--sidebar-border)',

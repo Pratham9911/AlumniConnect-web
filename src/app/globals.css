@@ -19,6 +19,7 @@
   --blue-text: #000000;
   --blue-bg:#ffffff;
   --blue-searchBG: #f1eeee;
+  --msgcolor: #e1dedecf; 
 }
 
 /* Dark Mode Class */
@@ -41,6 +42,7 @@
   --blue-bg: #04030d;
   --blue-bg: #04030d;
   --blue-searchBG: #262252;
+  --msgcolor: #4968be71;
 }
 
 /* Global Base */

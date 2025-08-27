@@ -13,6 +13,7 @@ export default function ChatLayout({ children }) {
        
       {/* Desktop sidebar */}
       <div className="hidden md:block w-[380px] border-r border-[var(--sidebar-border)]">
+        
         <ChatSidebar />
       </div>
 
@@ -20,11 +21,12 @@ export default function ChatLayout({ children }) {
       <div className="flex-1 overflow-hidden">
         {/* On mobile, show sidebar instead of fallback when at /chat */}
         <div className="md:hidden h-full">
+          
           {isChatRoot ? <ChatSidebar /> : children}
         </div>
 
         {/* On desktop, show children */}
-        <div className="hidden md:block h-full">
+        <div className="hidden md:block h-screen overflow-auto">
           {children}
         </div>
       </div>
