@@ -28,10 +28,10 @@ export default function ChatWithUser() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-  
+
   // ✅ 1. Setup socket once
   useEffect(() => {
-    
+
     socketRef.current = io(`${process.env.NEXT_PUBLIC_API_BASE}`);
     return () => socketRef.current.disconnect();
   }, []);
@@ -239,10 +239,20 @@ export default function ChatWithUser() {
     }
   );
 
+  const longPressTimeout = useRef(null);
 
+  const handleTouchStart = (msgId) => {
+    longPressTimeout.current = setTimeout(() => {
+      handleMessageSelect(null, msgId); // triggers selection
+    }, 1500); // 1.5 seconds
+  };
+
+  const handleTouchEnd = () => {
+    clearTimeout(longPressTimeout.current);
+  };
   return (
     <div
-     
+
       className="flex flex-col h-screen"
       style={{
         backgroundColor: theme === 'dark' ? '#0a0a0a' : '#f8f8f8',
@@ -250,7 +260,7 @@ export default function ChatWithUser() {
       }}
     >
       {/* Header */}
-      
+
       <div className="hidden md:block w-full h-14 sticky mb-0 z-50 ">
         <Navbar />
       </div>
@@ -282,9 +292,9 @@ export default function ChatWithUser() {
         ) : (
 
           <div className="flex items-center gap-3">
-           <button onClick={() => router.push('/chat')}>
-  <ArrowLeft className="w-6 h-6" />
-</button>
+            <button onClick={() => router.push('/chat')}>
+              <ArrowLeft className="w-6 h-6" />
+            </button>
             {otherUser.image ? (
               <img
                 src={otherUser.image}
@@ -310,7 +320,9 @@ export default function ChatWithUser() {
             <div
               key={msg._id}
               onContextMenu={(e) => handleMessageSelect(e, msg._id)} // right-click desktop
-              onTouchStart={(e) => handleMessageSelect(e, msg._id)} // long press mobile
+              onTouchStart={() => handleTouchStart(msg._id)}
+              onTouchEnd={handleTouchEnd}
+              onTouchMove={handleTouchEnd}
               className={`flex ${isMe ? "justify-end" : "justify-start"} ${isSelected ? "bg-green-200/40" : ""
                 } rounded-lg`}
             >
