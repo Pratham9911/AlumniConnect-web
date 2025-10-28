@@ -169,7 +169,7 @@ export default function HomePage() {
         <p className="text-gray-400">{new Date().getFullYear()} AlumniConnect. All rights reserved.</p>
 
         <div className="mt-3 text-sm text-gray-500">
-          Made by <span className="text-orange-400">Pratham Tiwari</span>
+          Made by<span className="text-orange-400"> Pratham Tiwari</span>
         </div>
       </footer>
     </div>
